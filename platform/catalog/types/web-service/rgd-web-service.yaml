@@ -1,0 +1,102 @@
+# PROVISIONAL — validate with AWS container specialist team before first engagement:
+#   - kro apiVersion/schema syntax against the managed KRO capability version
+#   - ACK CloudWatch Logs / CloudWatch controller availability as managed capabilities
+#   - Dashboard-as-code mechanism (ACK cloudwatch Dashboard vs. dashboard KRO type in T10)
+#
+# ResourceGraphDefinition: WebService (ADR-0004, ADR-0006)
+# The v1 golden-path workload type. Observability is baked in (ADR-0006):
+# deploying a WebService yields logs, alarms, and metrics with zero extra asks.
+apiVersion: kro.run/v1alpha1
+kind: ResourceGraphDefinition
+metadata:
+  name: webservice.platform.starterkit.aws
+spec:
+  schema:
+    apiVersion: v1alpha1
+    kind: WebService
+    spec:
+      serviceName: string | required=true description="Service identifier (kebab-case)"
+      teamName: string | required=true description="Owning Dev Team (namespace team-<teamName>)"
+      image: string | required=true description="Full image ref with pinned tag (ECR)"
+      port: integer | default=8080 description="Container HTTP port"
+      replicas: integer | default=2 description="Desired replicas"
+      size: string | default="small" description="T-shirt size: small|medium|large"
+  resources:
+    - id: deployment
+      template:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ${schema.spec.serviceName}
+          namespace: team-${schema.spec.teamName}
+          labels:
+            app: ${schema.spec.serviceName}
+            starterkit.aws/team: ${schema.spec.teamName}
+        spec:
+          replicas: ${schema.spec.replicas}
+          selector:
+            matchLabels:
+              app: ${schema.spec.serviceName}
+          template:
+            metadata:
+              labels:
+                app: ${schema.spec.serviceName}
+            spec:
+              containers:
+                - name: app
+                  image: ${schema.spec.image}
+                  ports:
+                    - containerPort: ${schema.spec.port}
+                  # Sizes map to requests/limits; LimitRange (team type) is the backstop.
+                  # small: 100m/128Mi -> 500m/512Mi (medium/large scale up; PROVISIONAL
+                  # mapping — kro CEL expression support to be validated)
+                  resources:
+                    requests: {cpu: 100m, memory: 128Mi}
+                    limits: {cpu: 500m, memory: 512Mi}
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                  livenessProbe:
+                    httpGet: {path: /healthz, port: ${schema.spec.port}}
+                  readinessProbe:
+                    httpGet: {path: /ready, port: ${schema.spec.port}}
+    - id: service
+      template:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: ${schema.spec.serviceName}
+          namespace: team-${schema.spec.teamName}
+        spec:
+          selector:
+            app: ${schema.spec.serviceName}
+          ports:
+            - port: 80
+              targetPort: ${schema.spec.port}
+    - id: logGroup
+      template:
+        # ACK CloudWatch Logs controller — retention curated by the Platform Team
+        apiVersion: cloudwatchlogs.services.k8s.aws/v1alpha1
+        kind: LogGroup
+        metadata:
+          name: ${schema.spec.serviceName}-logs
+          namespace: team-${schema.spec.teamName}
+        spec:
+          name: /platform/team-${schema.spec.teamName}/${schema.spec.serviceName}
+          retentionDays: 30
+    - id: errorAlarm
+      template:
+        # ACK CloudWatch controller — baseline alarm; more curated in T10
+        apiVersion: cloudwatch.services.k8s.aws/v1alpha1
+        kind: MetricAlarm
+        metadata:
+          name: ${schema.spec.serviceName}-5xx
+          namespace: team-${schema.spec.teamName}
+        spec:
+          alarmName: team-${schema.spec.teamName}-${schema.spec.serviceName}-5xx
+          metricName: HTTPCode_Target_5XX_Count
+          namespace_: AWS/ApplicationELB
+          statistic: Sum
+          period: 300
+          evaluationPeriods: 1
+          threshold: 10
+          comparisonOperator: GreaterThanThreshold

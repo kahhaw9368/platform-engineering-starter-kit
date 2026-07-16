@@ -1,9 +1,16 @@
-# Web API Template (v1's only app template — ADR-0014)
+# {{service_name}}
 
-To author:
-- [ ] app skeleton (language TBD with specialist team — FastAPI or Node candidate)
-- [ ] Dockerfile with health endpoints
-- [ ] .github/workflows/ci.yaml — reference implementation of the artifact contract (ADR-0005):
-      build image → push ECR → bump tag in GitOps repo
-- [ ] web-service instance manifest (the ~15-line KRO custom resource APEX PRs)
-- [ ] repo-local APEX context file (service name, team, template version — ADR-0012)
+Web API for team **{{team}}**, scaffolded from the platform's `web-api` golden-path template.
+
+## Run locally
+```
+pip install -r requirements-dev.txt
+uvicorn main:app --app-dir app --reload
+```
+
+## How this ships
+Push to `main` → CI builds the image, pushes to ECR, and opens a PR bumping the image tag in
+the GitOps repo → managed Argo CD deploys to nonprod. Promote with: ask Apex to
+"promote {{service_name}} to prod".
+
+Health endpoints `/healthz` and `/ready` are wired to the platform's probes — keep them fast.

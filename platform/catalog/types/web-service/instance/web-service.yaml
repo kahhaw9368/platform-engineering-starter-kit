@@ -1,0 +1,15 @@
+# WebService instance — the ~15-line artifact APEX PRs (ADR-0003/0004).
+# Expands via the webservice ResourceGraphDefinition (../rgd-web-service.yaml):
+# Deployment + Service + LogGroup + baseline alarm — observability included (ADR-0006).
+apiVersion: platform.starterkit.aws/v1alpha1
+kind: WebService
+metadata:
+  name: {{service_name}}
+  namespace: team-{{team}}
+spec:
+  serviceName: {{service_name}}
+  teamName: {{team}}
+  image: {{image}}
+  port: {{port}}
+  replicas: {{replicas}}
+  size: {{size}}

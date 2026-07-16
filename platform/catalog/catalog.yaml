@@ -60,17 +60,67 @@ items:
         type: integer
         description: Maximum pods in the team namespace
         default: 50
-  # --- Placeholder: authored by T3 (issue #4). MUST gain real artifacts +
-  # --- parameters before APEX may instantiate it.
   - name: web-service
     kind: kro-type
-    version: 0.0.1
-    description: "PLACEHOLDER (T3/#4): containerized web service with baked-in observability (ADR-0006)"
-    path: types/web-service
-    parameters: []
+    version: 0.1.0
+    description: Deploy a containerized web service — observability (logs, alarms) included
+    path: types/web-service/instance
+    parameters:
+      - name: service_name
+        type: string
+        description: Service identifier (kebab-case)
+        required: true
+        pattern: "[a-z][a-z0-9-]{2,40}"
+      - name: team
+        type: string
+        description: Owning Dev Team identifier
+        required: true
+        pattern: "[a-z][a-z0-9-]{1,30}"
+      - name: image
+        type: string
+        description: Full ECR image reference with pinned tag (no :latest)
+        required: true
+        pattern: "[0-9]+\\.dkr\\.ecr\\.[a-z0-9-]+\\.amazonaws\\.com/[a-z0-9./_-]+:(?!latest$)[A-Za-z0-9._-]+"
+      - name: port
+        type: integer
+        description: Container HTTP port
+        default: 8080
+      - name: replicas
+        type: integer
+        description: Desired replica count
+        default: 2
+      - name: size
+        type: enum
+        description: T-shirt size (maps to requests/limits)
+        values: [small, medium, large]
+        default: small
   - name: web-api
     kind: app-template
-    version: 0.0.1
-    description: "PLACEHOLDER (T3/#4): containerized HTTP API — Dockerfile, probes, GH Actions CI contract"
+    version: 0.1.0
+    description: Containerized HTTP API (FastAPI) — Dockerfile, probes, GH Actions CI implementing the artifact contract
     path: templates/web-api
-    parameters: []
+    parameters:
+      - name: service_name
+        type: string
+        description: Service identifier (kebab-case)
+        required: true
+        pattern: "[a-z][a-z0-9-]{2,40}"
+      - name: team
+        type: string
+        description: Owning Dev Team identifier
+        required: true
+        pattern: "[a-z][a-z0-9-]{1,30}"
+      - name: port
+        type: integer
+        description: Container HTTP port
+        default: 8080
+      - name: gitops_repo
+        type: string
+        description: GitOps repository (org/repo) that managed Argo CD watches
+        required: true
+        pattern: "[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"
+      - name: ci_role_arn
+        type: string
+        description: IAM role ARN CI assumes via OIDC to push to ECR (from Foundation bootstrap)
+        required: true
+        pattern: "arn:aws:iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+" 

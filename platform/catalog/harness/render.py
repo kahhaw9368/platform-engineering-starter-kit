@@ -109,8 +109,14 @@ def render_tree(src: Path, params: dict) -> dict[str, str]:
     """Mechanically substitute {{param}} in every artifact file.
     Returns {relative_path: content}. Exit 5 if any placeholder survives."""
     rendered, unresolved = {}, []
+    SKIP_DIRS = {"__pycache__", ".git", ".venv", "node_modules"}
+    SKIP_SUFFIXES = {".pyc", ".pyo"}
+    SKIP_NAMES = {".DS_Store"}
     for f in sorted(src.rglob("*")):
         if not f.is_file():
+            continue
+        if (set(f.parts) & SKIP_DIRS or f.suffix in SKIP_SUFFIXES
+                or f.name in SKIP_NAMES):
             continue
         rel = str(f.relative_to(src))
         # Parameters may also appear in file/dir names (e.g. {{service_name}}.yaml)
