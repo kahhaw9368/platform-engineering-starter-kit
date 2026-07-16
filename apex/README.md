@@ -12,3 +12,18 @@ Distributed via npx installer (ADR-0012). Welcome screen spec: docs/design/apex-
 - `steering/` — journey routing (welcome screen, slash commands)
 - `rules/` — guardrail behaviors (never freehand manifests — ADR-0003; PRs only; micro-survey
   etiquette — ADR-0011)
+
+## Implemented (T7/#8)
+
+- `skills/catalog-browse/` — /catalog: reads catalog.yaml, presents items + parameter surfaces,
+  never improvises capabilities
+- `skills/verify-setup/` — /verify-setup: harness/git/forge-CLI/IdC checks with fix hints,
+  read-only by design
+- `rules/apex-rules.md` — identity (Apex, 24×7 platform engineer), hard rules (never freehand,
+  never apply, never merge prod, declared parameters only), micro-survey etiquette
+- `steering/welcome.md` — the welcome screen (UNO-derived, docs/design spec), CUSTOMIZE markers
+  for per-customer lines
+
+Kiro degradation (ADR-0013): skills + rules are plain markdown following the Agent Skills
+standard — both harnesses read them; the SessionStart welcome hook is Claude Code garnish,
+Kiro uses a steering include (wired in T11's installer).
