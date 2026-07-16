@@ -20,14 +20,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyyaml pytest
+      - run: pip install pyyaml jsonschema pytest
       - name: Guardrail suite self-tests
         if: inputs.manifest_dir == ''
         run: pytest platform/guardrails/tests/ -q
       - name: Dog-food — render catalog items and check them
         if: inputs.manifest_dir == ''
         run: |
-          pip install jsonschema
           python platform/catalog/harness/render.py \
             --catalog platform/catalog/catalog.yaml --item dummy-item \
             --param widget_name=dogfood --param team=ci --out /tmp/rendered
