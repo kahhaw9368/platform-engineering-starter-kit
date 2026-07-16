@@ -1,0 +1,17 @@
+# Machine-readable catalog index — the only output space APEX instantiates from (ADR-0003).
+# Each entry: name, version (semver — 0.x = early adopters, ADR criteria #7), parameters.
+apiVersion: starterkit.aws/v1alpha1
+kind: Catalog
+items:
+  - name: team
+    kind: kro-type
+    version: 0.1.0        # placeholder — not yet authored
+    description: Onboard a Dev Team — namespace, quotas, RBAC, IdC group mapping, ECR, GitOps folder
+  - name: web-service
+    kind: kro-type
+    version: 0.1.0        # placeholder — not yet authored
+    description: Deploy a containerized web service with baked-in observability
+  - name: web-api
+    kind: app-template
+    version: 0.1.0        # placeholder — not yet authored
+    description: Containerized HTTP API — Dockerfile, health probes, requests/limits, GH Actions CI
