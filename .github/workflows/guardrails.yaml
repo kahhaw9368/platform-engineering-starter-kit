@@ -1,0 +1,37 @@
+# Guardrail policy suite (ticket T2 / issue #3, ADR-0009) — reusable workflow.
+# GitOps repos call this as their required PR check; this repo dog-foods it
+# on its own catalog output.
+name: guardrails
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+    inputs:
+      manifest_dir:
+        description: Directory of manifests to check
+        type: string
+        required: true
+jobs:
+  policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml pytest
+      - name: Guardrail suite self-tests
+        if: inputs.manifest_dir == ''
+        run: pytest platform/guardrails/tests/ -q
+      - name: Dog-food — render catalog items and check them
+        if: inputs.manifest_dir == ''
+        run: |
+          pip install jsonschema
+          python platform/catalog/harness/render.py \
+            --catalog platform/catalog/catalog.yaml --item dummy-item \
+            --param widget_name=dogfood --param team=ci --out /tmp/rendered
+          python platform/guardrails/policies.py /tmp/rendered
+      - name: Check provided manifests
+        if: inputs.manifest_dir != ''
+        run: python platform/guardrails/policies.py "${{ inputs.manifest_dir }}"

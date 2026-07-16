@@ -4,6 +4,7 @@ apiVersion: platform.starterkit.aws/v1alpha1
 kind: DummyWidget
 metadata:
   name: {{widget_name}}
+  namespace: team-{{team}}
   labels:
     starterkit.aws/team: {{team}}
 spec:
