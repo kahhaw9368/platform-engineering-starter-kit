@@ -1,17 +1,52 @@
 # Machine-readable catalog index — the only output space APEX instantiates from (ADR-0003).
-# Each entry: name, version (semver — 0.x = early adopters, ADR criteria #7), parameters.
+# Schema: schema/catalog-schema.json (enforced in CI via the render harness).
+# Semver: 0.x = early adopters (ADR criteria #7).
 apiVersion: starterkit.aws/v1alpha1
 kind: Catalog
 items:
+  - name: dummy-item
+    kind: kro-type
+    version: 0.1.0
+    description: Seam-proving fixture demonstrating the render harness end-to-end (not shown by APEX)
+    path: types/dummy-item
+    parameters:
+      - name: widget_name
+        type: string
+        description: Name of the widget instance
+        required: true
+        pattern: "[a-z][a-z0-9-]{2,30}"
+      - name: team
+        type: string
+        description: Owning Dev Team identifier
+        required: true
+        pattern: "[a-z][a-z0-9-]{1,30}"
+      - name: size
+        type: enum
+        description: T-shirt size of the widget
+        values: [small, medium, large]
+        default: small
+      - name: replicas
+        type: integer
+        description: Number of widget replicas
+        default: 2
+
+  # --- Placeholders: authored by T3/T4 (issues #4, #5). Listed as roadmap; they
+  # --- MUST gain real artifacts + parameters before APEX may instantiate them.
   - name: team
     kind: kro-type
-    version: 0.1.0        # placeholder — not yet authored
-    description: Onboard a Dev Team — namespace, quotas, RBAC, IdC group mapping, ECR, GitOps folder
+    version: 0.0.1
+    description: "PLACEHOLDER (T4/#5): onboard a Dev Team — namespace, quotas, RBAC, IdC mapping, ECR, GitOps folder"
+    path: types/team
+    parameters: []
   - name: web-service
     kind: kro-type
-    version: 0.1.0        # placeholder — not yet authored
-    description: Deploy a containerized web service with baked-in observability
+    version: 0.0.1
+    description: "PLACEHOLDER (T3/#4): containerized web service with baked-in observability (ADR-0006)"
+    path: types/web-service
+    parameters: []
   - name: web-api
     kind: app-template
-    version: 0.1.0        # placeholder — not yet authored
-    description: Containerized HTTP API — Dockerfile, health probes, requests/limits, GH Actions CI
+    version: 0.0.1
+    description: "PLACEHOLDER (T3/#4): containerized HTTP API — Dockerfile, probes, GH Actions CI contract"
+    path: templates/web-api
+    parameters: []

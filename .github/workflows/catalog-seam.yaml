@@ -1,0 +1,27 @@
+# The Catalog contract seam in CI (ticket T1 / issue #2).
+# Fails the PR when: catalog.yaml violates the schema, an item's artifacts are
+# missing, a declared parameter surface is inconsistent, or rendering is broken.
+name: catalog-seam
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  seam:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install harness dependencies
+        run: pip install pyyaml jsonschema pytest
+      - name: Run seam tests
+        run: pytest platform/catalog/harness/tests/ -q
+      - name: Render every non-placeholder catalog item (smoke)
+        run: |
+          python platform/catalog/harness/render.py \
+            --catalog platform/catalog/catalog.yaml \
+            --item dummy-item \
+            --param widget_name=ci-widget --param team=ci \
+            --check

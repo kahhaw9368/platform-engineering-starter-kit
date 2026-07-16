@@ -1,0 +1,11 @@
+# Dummy catalog item — proves the render seam end-to-end (ticket T1).
+# Not a real platform capability; excluded from APEX catalog-browse by convention (name prefix).
+apiVersion: platform.starterkit.aws/v1alpha1
+kind: DummyWidget
+metadata:
+  name: {{widget_name}}
+  labels:
+    starterkit.aws/team: {{team}}
+spec:
+  size: {{size}}
+  replicas: {{replicas}}
