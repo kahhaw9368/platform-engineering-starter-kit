@@ -1,0 +1,99 @@
+# PROVISIONAL — validate with AWS container specialist team before first engagement:
+#   - kro apiVersion/schema syntax against the managed KRO capability version
+#   - ACK ECR controller availability as a managed capability
+#   - IdC group -> RBAC mapping mechanism (access entries vs. group binding)
+#
+# ResourceGraphDefinition: Team (ADR-0008 tenancy)
+# Platform-Team-owned. Instances of the generated Team API are what APEX PRs
+# (see instance/ for the developer-facing artifact this expands from).
+apiVersion: kro.run/v1alpha1
+kind: ResourceGraphDefinition
+metadata:
+  name: team.platform.starterkit.aws
+spec:
+  schema:
+    apiVersion: v1alpha1
+    kind: Team
+    spec:
+      teamName: string | required=true description="Dev Team identifier (kebab-case)"
+      idcGroup: string | required=true description="IAM Identity Center group name mapped to this team"
+      cpuQuota: string | default="8" description="Namespace CPU request quota"
+      memoryQuota: string | default="16Gi" description="Namespace memory request quota"
+      podQuota: integer | default=50 description="Max pods in the team namespace"
+  resources:
+    - id: namespace
+      template:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: team-${schema.spec.teamName}
+          labels:
+            starterkit.aws/team: ${schema.spec.teamName}
+            starterkit.aws/managed-by: platform
+    - id: quota
+      template:
+        apiVersion: v1
+        kind: ResourceQuota
+        metadata:
+          name: team-quota
+          namespace: team-${schema.spec.teamName}
+        spec:
+          hard:
+            requests.cpu: ${schema.spec.cpuQuota}
+            requests.memory: ${schema.spec.memoryQuota}
+            pods: ${schema.spec.podQuota}
+    - id: limitrange
+      template:
+        # Default requests/limits so guardrail GR001 has a namespace-level backstop
+        apiVersion: v1
+        kind: LimitRange
+        metadata:
+          name: team-defaults
+          namespace: team-${schema.spec.teamName}
+        spec:
+          limits:
+            - type: Container
+              defaultRequest: {cpu: 100m, memory: 128Mi}
+              default: {cpu: 500m, memory: 512Mi}
+    - id: devrole
+      template:
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: team-developer
+          namespace: team-${schema.spec.teamName}
+        rules:
+          # Read-everything, write-nothing: changes enter via GitOps only (ADR-0003/0004).
+          - apiGroups: ["", "apps", "batch", "platform.starterkit.aws"]
+            resources: ["*"]
+            verbs: ["get", "list", "watch"]
+    - id: devbinding
+      template:
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: team-developer
+          namespace: team-${schema.spec.teamName}
+        subjects:
+          - kind: Group
+            # PROVISIONAL: IdC group propagation to RBAC group names — confirm
+            # exact subject format with specialist team (EKS access entries).
+            name: ${schema.spec.idcGroup}
+            apiGroup: rbac.authorization.k8s.io
+        roleRef:
+          kind: Role
+          name: team-developer
+          apiGroup: rbac.authorization.k8s.io
+    - id: ecrRepo
+      template:
+        # ACK ECR controller (managed capability) — one repo per team namespace prefix
+        apiVersion: ecr.services.k8s.aws/v1alpha1
+        kind: Repository
+        metadata:
+          name: team-${schema.spec.teamName}-ecr
+          namespace: team-${schema.spec.teamName}
+        spec:
+          name: ${schema.spec.teamName}
+          imageTagMutability: IMMUTABLE
+          imageScanningConfiguration:
+            scanOnPush: true

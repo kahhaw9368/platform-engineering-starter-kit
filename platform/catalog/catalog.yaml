@@ -30,14 +30,38 @@ items:
         description: Number of widget replicas
         default: 2
 
-  # --- Placeholders: authored by T3/T4 (issues #4, #5). Listed as roadmap; they
-  # --- MUST gain real artifacts + parameters before APEX may instantiate them.
   - name: team
     kind: kro-type
-    version: 0.0.1
-    description: "PLACEHOLDER (T4/#5): onboard a Dev Team — namespace, quotas, RBAC, IdC mapping, ECR, GitOps folder"
-    path: types/team
-    parameters: []
+    version: 0.1.0
+    description: Onboard a Dev Team — namespace, quotas, RBAC, IdC group mapping, ECR repository
+    path: types/team/instance
+    parameters:
+      - name: team_name
+        type: string
+        description: Dev Team identifier (kebab-case)
+        required: true
+        pattern: "[a-z][a-z0-9-]{1,30}"
+      - name: idc_group
+        type: string
+        description: IAM Identity Center group name for this team's Developers
+        required: true
+        pattern: "[A-Za-z0-9._-]{2,64}"
+      - name: cpu_quota
+        type: string
+        description: Namespace CPU request quota (e.g. "8")
+        default: "8"
+        pattern: "[0-9]+m?"
+      - name: memory_quota
+        type: string
+        description: Namespace memory request quota (e.g. 16Gi)
+        default: 16Gi
+        pattern: "[0-9]+[GM]i"
+      - name: pod_quota
+        type: integer
+        description: Maximum pods in the team namespace
+        default: 50
+  # --- Placeholder: authored by T3 (issue #4). MUST gain real artifacts +
+  # --- parameters before APEX may instantiate it.
   - name: web-service
     kind: kro-type
     version: 0.0.1

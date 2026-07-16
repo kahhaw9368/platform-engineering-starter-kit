@@ -98,3 +98,18 @@ def test_rendered_dummy_item_passes_guardrails_dogfood(tmp_path):
     assert r1.returncode == 0, r1.stderr
     r2 = run(out)
     assert r2.returncode == 0, r2.stdout
+
+
+def test_rendered_team_item_passes_guardrails_dogfood(tmp_path):
+    """Every real catalog item's render output passes guardrails (T4/#5)."""
+    render = ROOT / "platform" / "catalog" / "harness" / "render.py"
+    catalog = ROOT / "platform" / "catalog" / "catalog.yaml"
+    out = tmp_path / "rendered"
+    r1 = subprocess.run(
+        [sys.executable, str(render), "--catalog", str(catalog), "--item", "team",
+         "--param", "team_name=payments", "--param", "idc_group=payments-devs",
+         "--out", str(out)],
+        capture_output=True, text=True)
+    assert r1.returncode == 0, r1.stderr
+    r2 = run(out)
+    assert r2.returncode == 0, r2.stdout
