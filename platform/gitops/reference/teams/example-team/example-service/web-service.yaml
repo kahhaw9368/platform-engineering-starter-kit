@@ -1,0 +1,13 @@
+# nonprod state — CI tag-bump PRs update spec.image here (artifact contract step 3)
+apiVersion: platform.starterkit.aws/v1alpha1
+kind: WebService
+metadata:
+  name: example-service
+  namespace: team-example-team
+spec:
+  serviceName: example-service
+  teamName: example-team
+  image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/example-team/example-service:abc123def456
+  port: 8080
+  replicas: 2
+  size: small

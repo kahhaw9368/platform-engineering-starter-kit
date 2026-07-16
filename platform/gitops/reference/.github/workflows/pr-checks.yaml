@@ -1,0 +1,10 @@
+# Required PR check for the GitOps repo: every manifest — golden-path or
+# trailblazer — passes the guardrail suite (ADR-0009).
+name: guardrails
+on:
+  pull_request:
+jobs:
+  policy-check:
+    uses: {{starter_kit_repo}}/.github/workflows/guardrails.yaml@main
+    with:
+      manifest_dir: .
