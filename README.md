@@ -1,57 +1,57 @@
 # Platform Engineering Starter Kit
 
-A guided-first starter kit that bootstraps a customer's platform team into building and running an
-internal developer platform on **AWS EKS Auto Mode** — led by a **platform-as-product mindset**
-(Team Topologies), fronted by **APEX**, an agentic platform engineer available to developers 24×7.
+Build and run an internal developer platform on **AWS EKS** — without a large platform team
+or months of lead time.
 
-> **Start here:** [`CONTEXT.md`](CONTEXT.md) (glossary) · [`docs/adr/`](docs/adr/) (15 locked
-> decisions) · [`docs/context/platform-as-product-criteria.md`](docs/context/platform-as-product-criteria.md)
-> (the 8 best-practice criteria)
+The kit gives a newly formed platform team two things:
 
-## The thesis
+1. **A working technical foundation** — two EKS Auto Mode clusters (nonprod and prod), GitOps
+   delivery, and a catalog of ready-to-use service templates, stood up by a guided,
+   dry-run-first bootstrap.
+2. **A product operating model** — short workshops and recurring rituals that treat the
+   platform as a product whose customers are your developers, so you build what teams
+   actually need instead of what looks impressive.
 
-**The platform team operates almost nothing.** Every component is either an AWS-managed
-capability or versioned files in git:
+Both are fronted by **APEX**: an AI platform engineer that runs inside your terminal
+(Claude Code or Kiro CLI) and is available to every developer, 24×7. Developers ask it for a
+new service and get one; platform engineers use it to onboard teams and run the product
+rituals. There is no web portal to install and no ticket queue to wait in.
 
-| Concern | How | ADR |
+## How it works
+
+- **The platform team operates almost nothing.** Every component is either an AWS-managed
+  capability (EKS Auto Mode, managed Argo CD, CloudWatch) or versioned files in git.
+- **All change flows through git.** Developers never touch AWS directly — a service, a
+  namespace, or a promotion to prod is always a pull request, reviewed and merged.
+- **The agent instantiates templates; it never improvises infrastructure.** Everything APEX
+  creates comes from the versioned catalog your platform team controls.
+- **Start small, grow on demand.** The kit ships the smallest platform that is genuinely
+  useful, and names the graduation steps (e.g. policy engines, delivery orchestration) to
+  adopt only when real usage demands them.
+
+## Who is this for?
+
+| You are | You will | Start at |
 |---|---|---|
-| Compute | EKS Auto Mode (only) | 0001 |
-| Front door | APEX chat persona (TUI), no web portal | 0002 |
-| Golden path | Agent instantiates versioned artifacts, never freehands | 0003 |
-| Infra provisioning | git → managed Argo CD → KRO → ACK → AWS (one pipe) | 0004 |
-| CI | Artifact contract; GitHub Actions reference implementation | 0005 |
-| Observability | Baked into every KRO type (CloudWatch) | 0006 |
-| Environments | nonprod + prod clusters; APEX-assisted PR promotion | 0007 |
-| Tenancy | Namespace-per-team via a `Team` KRO type | 0008 |
-| Guardrails | CI policy checks + quotas; no admission engine in v1 | 0009 |
-| Product operating model | APEX-facilitated (week zero + rituals) | 0010 |
-| Metrics | Derived from git + CloudWatch; APEX micro-surveys | 0011 |
-| Distribution | npx installer; harness-agnostic (Claude Code ref, Kiro supported) | 0012, 0013 |
-| V1 catalog | One Web API template; infra self-service as growth path | 0014 |
-| Engagement done | First real service in production | 0015 |
+| A **Platform Engineer** — standing up and owning the platform | Scope the platform with your first customers, provision the foundation, onboard teams | [For Platform Engineers](#for-platform-engineers) |
+| A **Developer** — building services on an existing platform | Scaffold, ship, observe, and promote your services through the agent | [For Developers](#for-developers) |
 
-Heavier tools (Kargo, Kyverno, DevLake, Backstage) are **named graduation steps**, adopted on
-validated demand — never shipped speculatively.
+## For Platform Engineers
 
-## Getting started (Platform Engineer)
+Eight steps, in order. The first five get the agent running and verified; the last three
+stand up the platform, each gated on the one before.
 
-Eight steps, in order — the first five get the agent running and verified, the last three
-stand up the platform, each gated on the one before: week zero locks the TVP scope before
-any money is spent, and the bootstrap creates the clusters the first Dev Team lands on.
-*(Developer joining an existing platform? Skip to
-[Getting started (Developer)](#getting-started-developer).)*
-
-### 1. IAM permissions
+### 1. Get the right AWS access
 
 Log in via **IAM Identity Center** (`aws sso login`) with a permission set that can stand up
-and operate the platform. Minimum capabilities for the Platform Engineer role:
+and operate the platform. Minimum capabilities:
 
 | Purpose | Permissions (minimum) |
 |---|---|
 | Create/manage the clusters | `eks:*` on `platform-*` clusters (create, describe, update, delete, access entries) |
-| EKS Capabilities (managed Argo CD, ACK, KRO) | `eks:CreateCapability`, `eks:DescribeCapability`, `eks:ListCapabilities`, `eks:UpdateCapability`, `eks:DeleteCapability` |
+| EKS Capabilities — the AWS-managed add-ons the platform runs on: Argo CD (GitOps delivery), ACK (AWS resources managed from Kubernetes), KRO (composable resource templates) | `eks:CreateCapability`, `eks:DescribeCapability`, `eks:ListCapabilities`, `eks:UpdateCapability`, `eks:DeleteCapability` |
 | Cluster networking (created by eksctl) | `ec2:*` on VPC/subnet/SG resources, `cloudformation:*` on `eksctl-*` stacks |
-| Service roles | `iam:CreateRole`, `iam:AttachRolePolicy`, `iam:PassRole` scoped to `platform-*` roles (incl. the CI OIDC role) |
+| Service roles | `iam:CreateRole`, `iam:AttachRolePolicy`, `iam:PassRole` scoped to `platform-*` roles — includes the role the bootstrap creates so CI pipelines can push images without long-lived keys |
 | Container registry | `ecr:*` on team repositories |
 | Observability (read for APEX; write via GitOps) | `cloudwatch:Describe*/Get*/List*`, `logs:Describe*/Get*/Filter*` |
 | Identity wiring | `sso-admin` / Identity Center group read, to map Dev Team groups to cluster RBAC |
@@ -63,19 +63,19 @@ aws sts get-caller-identity        # right account?
 aws eks list-clusters              # permission works?
 ```
 
-A **Developer** needs none of the write permissions — only IdC login, CloudWatch/logs read,
-and git. That's the point of the one-pipe design (ADR-0004).
+Developers need none of these write permissions — their path is covered in
+[For Developers](#for-developers).
 
-### 2. Verify required packages
+### 2. Install the required tools
 
-| Package | Check | Needed for |
+| Tool | Check | Needed for |
 |---|---|---|
 | Node.js 18+ | `node --version` | the installer |
 | git | `git --version` | everything — all change flows through git |
-| AWS CLI v2 | `aws --version` | IdC login, CloudWatch reads |
-| GitHub CLI | `gh auth status` | PRs (or your forge's CLI — GitLab: `glab`) |
-| Agent harness | `claude --version` or `kiro --version` | running APEX — [Claude Code](https://claude.com/claude-code) (reference) or Kiro CLI (supported) |
-| eksctl ≥ 0.229 + kubectl | `eksctl version` / `kubectl version --client` | **foundation bootstrap only** — Developers never need these (older eksctl rejects k8s 1.33; install from homebrew-core, the weaveworks tap is dead) |
+| AWS CLI v2 | `aws --version` | Identity Center login, CloudWatch reads |
+| GitHub CLI | `gh auth status` | pull requests (or your forge's CLI — GitLab: `glab`) |
+| An agent CLI — [Claude Code](https://claude.com/claude-code) or [Kiro CLI](https://kiro.dev); you need one, not both | `claude --version` or `kiro --version` | running APEX (APEX is content these CLIs load, not a separate program) |
+| eksctl ≥ 0.229 + kubectl | `eksctl version` / `kubectl version --client` | **step 7 only** — Developers never need these. Install per the [eksctl docs](https://eksctl.io/installation/); versions below 0.229 reject the Kubernetes version the kit uses |
 
 ### 3. Install APEX
 
@@ -83,9 +83,9 @@ and git. That's the point of the one-pipe design (ADR-0004).
 npx github:kahhaw9368/platform-engineering-starter-kit
 ```
 
-The installer detects your harness(es) and copies everything into place: 8 APEX skills, 10
-curated EKS skills (vendored from [sample-apex-skills](https://github.com/aws-samples/sample-apex-skills)),
-and Apex's rules + welcome screen — into `~/.claude/` and/or `~/.kiro/`.
+The installer detects which agent CLI you have and copies everything into place: the APEX
+skills, curated EKS knowledge, and the agent's rules and welcome screen — into `~/.claude/`
+and/or `~/.kiro/`.
 
 ```bash
 npx github:kahhaw9368/platform-engineering-starter-kit --update           # refresh
@@ -99,67 +99,89 @@ npx github:kahhaw9368/platform-engineering-starter-kit --uninstall        # remo
 claude        # or: kiro
 ```
 
-That's it — APEX is not a separate binary; it's skills + rules loaded by your harness. The
-APEX welcome screen greets you with the Quick Start menu.
+That's it — the agent CLI loads the APEX skills and rules, and the welcome screen greets
+you with a quick-start menu. From here on, "Apex" is who you're talking to.
 
-### 5. Verify from inside the agent
+### 5. Verify your setup
 
 First session, in order:
 
 ```
-> /verify-setup        # checks harness, git, gh, IdC login — with fix hints per failure
-> /catalog             # see every golden-path item you can self-serve
+> /verify-setup        # checks agent CLI, git, gh, Identity Center login — with fix hints
+> /catalog             # see every template and capability you can self-serve
 ```
 
-`/verify-setup` covers the daily-driver tools; it does **not** probe eksctl/kubectl (the
-Foundation runbook preflights its own tools) or the step-1 write permissions — run the step-1
-sanity checks for those.
+`/verify-setup` covers the everyday tools. It does **not** check eksctl/kubectl (the
+bootstrap in step 7 checks its own tools before touching anything) or the step-1 write
+permissions — platform engineers should run the step-1 sanity checks for those; this
+caveat does not apply to Developers.
 
-### 6. Week-zero assessment
+### 6. Run the discovery workshop
 
-Ask Apex to run the **week-zero assessment** ("let's do week zero") — it interviews you
-through value proposition, personas, and TVP scope before anything is built. Don't bootstrap
-before this: week zero is what confirms the TVP is worth the runbook's monthly cost.
+Before building anything, ask Apex: *"let's do week zero."* It runs a short, structured
+interview — who the platform's first customers are, what problem it solves for them, and
+what the **smallest genuinely useful first version** of the platform must include (and,
+just as important, what it can leave out). The output is a one-page scope you can defend.
 
-### 7. Foundation bootstrap (one-time)
+Don't skip this and don't bootstrap first: the workshop is what confirms the platform is
+worth its monthly cost before any money is spent.
 
-Follow the [Foundation runbook](platform/foundation/) — clusters, capabilities, GitOps repo.
-It runs from your terminal (not through APEX — this is the eksctl/kubectl step from the
-packages table), dry-run first, with a recommended day-0 Apex review of the rendered plan.
-The runbook covers who runs it, duration, and monthly cost before anything is created.
+### 7. Provision the foundation (one-time)
 
-### 8. Onboard your first Dev Team
+Follow the [Foundation runbook](platform/foundation/) — clusters, capabilities, GitOps
+repo. It runs from your terminal (not through APEX — this is the eksctl/kubectl step from
+the tools table), dry-run first, with a recommended Apex review of the rendered plan. The
+runbook states who runs it, how long it takes, and what it costs per month **before**
+anything is created.
 
-Back inside the agent: `/onboard-team` your first **real** Dev Team (not a demo team —
-engagement done means a real service in production, ADR-0015). It renders the Team instance
-and opens the GitOps PR; on merge their namespace, quotas, and ECR repo exist (ADR-0008).
-Once that first PR is merged, the platform is live — hand Developers
-[Getting started (Developer)](#getting-started-developer).
+### 8. Onboard your first team
 
-## Getting started (Developer)
+Back inside the agent: `/onboard-team` your first **real** development team — not a demo
+team; the goal of the whole engagement is a real service in production. Have two things
+ready: the team's name and the Identity Center group its developers log in with. The agent
+renders the team's configuration and opens a pull request; when it merges, the team's
+namespace, quotas, and container registry exist.
 
-Developers **never touch the Foundation layer or its tools** — no eksctl, no kubectl, no AWS
-write permissions. Your changes flow through git PRs down the one pipe (ADR-0004). You need
-IdC login (`aws sso login`), CloudWatch/logs read, and git — nothing from the step-1
-permission table — then steps 2–5 above, skipping the eksctl/kubectl row. In `/verify-setup`,
-that's every check passing; it never probes the Foundation tools. Then, any day:
+The platform is now live. Hand your developers the next section.
 
-1. `/scaffold-service` — conversation → two PRs → service deployed to nonprod on merge.
-2. `/service-health` — "how is my service doing?" from CloudWatch.
-3. `/promote` — tested release → human-approved PR → prod.
+## For Developers
 
-Or skip the slash commands and just ask: *"I need a Python API for the payments team."*
+You build services **on** the platform; you never touch the machinery **under** it. No
+eksctl, no kubectl, no AWS write permissions — every change you make travels as a pull
+request, reviewed and merged.
 
-## Repo layout
+What you need:
 
-```
-engagement/        Layer 1 — product operating model (week-zero, rituals, worksheets)
-platform/          Layer 2 — technical TVP
-  foundation/      One-time bootstrap (VPC, clusters, capabilities, IdC) — engagement tooling
-  catalog/         The golden-path artifacts (KRO types + app templates), semver-versioned
-  gitops/          GitOps repo structure Argo CD watches (team folders, env config)
-  guardrails/      CI policy checks (schema + policy-as-code) required on every PR
-apex/              APEX agent content (skills, steering, rules) — harness-portable
-installer/         npx installer that delivers apex/ to developer machines
-docs/              ADRs, design specs, criteria framework
-```
+1. **Access** — Identity Center login (`aws sso login`), CloudWatch read, and git. Nothing
+   from the platform-engineer permission table.
+2. **Tools** — steps [2](#2-install-the-required-tools) to [5](#5-verify-your-setup) above,
+   skipping the eksctl/kubectl row. `/verify-setup` should pass every check.
+
+From then on, any day:
+
+| Ask | What happens |
+|---|---|
+| `/scaffold-service` | a short conversation → two pull requests → your service deployed to nonprod on merge |
+| `/service-health` | "how is my service doing?" answered from CloudWatch |
+| `/promote` | a tested release → a human-approved pull request → production |
+
+Or skip the commands and just ask in plain words: *"I need a Python API for the payments
+team."*
+
+## What it costs
+
+An idle foundation runs roughly **USD 200–300/month** (two EKS control planes, system
+compute, NAT gateways; less if you bring an existing VPC). The
+[Foundation runbook](platform/foundation/) has the breakdown and the teardown that reverses
+all of it.
+
+## Under the hood
+
+For readers who want the reasoning behind the design:
+
+- [`CONTEXT.md`](CONTEXT.md) — the project glossary (what we mean by *Platform*, *APEX*,
+  *golden path*, *Foundation*).
+- [`docs/adr/`](docs/adr/) — 15 architecture decision records covering every locked choice
+  (why EKS Auto Mode only, why no web portal, why GitOps is the single delivery pipe).
+- [`docs/context/platform-as-product-criteria.md`](docs/context/platform-as-product-criteria.md)
+  — the eight platform-as-product criteria the kit is built against.
