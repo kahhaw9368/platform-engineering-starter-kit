@@ -25,10 +25,10 @@ the marked lines at bootstrap. Every command listed MUST exist (criteria #6 rule
 
  📋  QUICK START
  /catalog                                Browse everything you can self-serve
- "scaffold a new service"                Create a service (golden path)
- "onboard my team"                       Onboard your team to the platform
- "promote <service> to prod"             Promote a tested release
- "how is <service> doing?"               Service health from CloudWatch
+ /scaffold-service                       Create a service (golden path)
+ /onboard-team                           Onboard your team to the platform
+ /promote                                Promote a tested release to prod
+ /service-health                         Service health from CloudWatch
  /verify-setup                           Verify your prerequisites
 
  Or just ask — e.g. "I need a Python API with a Postgres database"
@@ -45,5 +45,5 @@ the marked lines at bootstrap. Every command listed MUST exist (criteria #6 rule
  📣  Rate your last journey → one tap, right here in chat
 ```
 
-Note: scaffold/onboard/promote/health appear as natural-language asks (not slash commands)
-until T8 ships those journeys as skills; /catalog and /verify-setup exist as of T7.
+All six Quick Start commands exist as skills (T7 + T8). Natural-language asks route to the
+same skills via their descriptions.

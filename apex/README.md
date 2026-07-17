@@ -27,3 +27,15 @@ Distributed via npx installer (ADR-0012). Welcome screen spec: docs/design/apex-
 Kiro degradation (ADR-0013): skills + rules are plain markdown following the Agent Skills
 standard — both harnesses read them; the SessionStart welcome hook is Claude Code garnish,
 Kiro uses a steering include (wired in T11's installer).
+
+## Journeys (T8/#9)
+
+- `skills/scaffold-service/` — interview (declared params only) → render harness → guardrails →
+  two linked PRs (service repo + GitOps registration)
+- `skills/onboard-team/` — Team instance render → one GitOps PR → tenancy on merge
+- `skills/promote/` — proven nonprod tag → prod PR touching only spec.image, human-gated;
+  advisory health check in PR body; never merges
+- `skills/service-health/` — read-only CloudWatch answers (alarms, errors, drift); no survey
+
+All four end-to-end conversations are bounded by apex-rules.md hard rules; render + guardrail
+mechanics are the T1/T2 seams — the skills orchestrate, the harness produces.
