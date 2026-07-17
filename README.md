@@ -35,8 +35,11 @@ validated demand — never shipped speculatively.
 
 ## Getting started (Platform Engineer)
 
-Five steps, in order. Steps 1–2 are one-time setup; a Developer joining later only needs
-steps 2–5 (with read-mostly permissions — their changes flow through git PRs, not AWS APIs).
+Eight steps, in order — the first five get the agent running and verified, the last three
+stand up the platform, each gated on the one before: week zero locks the TVP scope before
+any money is spent, and the bootstrap creates the clusters the first Dev Team lands on.
+*(Developer joining an existing platform? Skip to
+[Getting started (Developer)](#getting-started-developer).)*
 
 ### 1. IAM permissions
 
@@ -99,25 +102,48 @@ claude        # or: kiro
 That's it — APEX is not a separate binary; it's skills + rules loaded by your harness. The
 APEX welcome screen greets you with the Quick Start menu.
 
-### 5. Inside the agent
+### 5. Verify from inside the agent
 
-In order, first session:
+First session, in order:
 
 ```
-> /verify-setup        # confirms steps 1–2 actually work, with fix hints per failure
+> /verify-setup        # checks harness, git, gh, IdC login — with fix hints per failure
 > /catalog             # see every golden-path item you can self-serve
 ```
 
-Then, depending on who you are:
+`/verify-setup` covers the daily-driver tools; it does **not** probe eksctl/kubectl (the
+Foundation runbook preflights its own tools) or the step-1 write permissions — run the step-1
+sanity checks for those.
 
-**Platform Engineer, day one** (standing up the platform):
-1. Ask Apex to run the **week-zero assessment** ("let's do week zero") — it interviews you
-   through value proposition, personas, and TVP scope before anything is built.
-2. Run the one-time [Foundation bootstrap](platform/foundation/) (clusters, capabilities,
-   GitOps repo) — guided, outside the agent.
-3. `/onboard-team` your first real Dev Team.
+### 6. Week-zero assessment
 
-**Developer, any day:**
+Ask Apex to run the **week-zero assessment** ("let's do week zero") — it interviews you
+through value proposition, personas, and TVP scope before anything is built. Don't bootstrap
+before this: week zero is what confirms the TVP is worth the runbook's monthly cost.
+
+### 7. Foundation bootstrap (one-time)
+
+Follow the [Foundation runbook](platform/foundation/) — clusters, capabilities, GitOps repo.
+It runs from your terminal (not through APEX — this is the eksctl/kubectl step from the
+packages table), dry-run first, with a recommended day-0 Apex review of the rendered plan.
+The runbook covers who runs it, duration, and monthly cost before anything is created.
+
+### 8. Onboard your first Dev Team
+
+Back inside the agent: `/onboard-team` your first **real** Dev Team (not a demo team —
+engagement done means a real service in production, ADR-0015). It renders the Team instance
+and opens the GitOps PR; on merge their namespace, quotas, and ECR repo exist (ADR-0008).
+Once that first PR is merged, the platform is live — hand Developers
+[Getting started (Developer)](#getting-started-developer).
+
+## Getting started (Developer)
+
+Developers **never touch the Foundation layer or its tools** — no eksctl, no kubectl, no AWS
+write permissions. Your changes flow through git PRs down the one pipe (ADR-0004). You need
+IdC login (`aws sso login`), CloudWatch/logs read, and git — nothing from the step-1
+permission table — then steps 2–5 above, skipping the eksctl/kubectl row. In `/verify-setup`,
+that's every check passing; it never probes the Foundation tools. Then, any day:
+
 1. `/scaffold-service` — conversation → two PRs → service deployed to nonprod on merge.
 2. `/service-health` — "how is my service doing?" from CloudWatch.
 3. `/promote` — tested release → human-approved PR → prod.
