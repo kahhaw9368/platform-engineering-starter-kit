@@ -22,6 +22,14 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 const REPO = "https://github.com/kahhaw9368/platform-engineering-starter-kit.git";
+const UPSTREAM = "https://github.com/aws-samples/sample-apex-skills.git";
+// Developer-surface vendored skills (dispositions: apex/skills/VENDORED.md).
+// eks-build + terraform-skill are engagement-only; ecs-*, eks-platform-engineering excluded.
+const VENDORED = [
+  "eks-best-practices", "eks-security", "eks-cost-intelligence",
+  "eks-operation-review", "eks-upgrade-check", "eks-recon",
+  "eks-mcp-server", "eks-genai", "eks-ingress-migration", "eks-design",
+];
 const args = process.argv.slice(2);
 const flag = (name) => {
   const i = args.indexOf(name);
@@ -70,11 +78,34 @@ function detectHarnesses() {
   return found;
 }
 
+function ensureUpstream() {
+  const cache = path.join(CACHE + "-upstream");
+  if (flag("--source")) return null; // hermetic test mode: skip upstream fetch
+  if (!fs.existsSync(cache)) {
+    log("fetching vendored skills (sample-apex-skills)...");
+    execSync(`git clone --depth 1 ${UPSTREAM} "${cache}"`, { stdio: "pipe" });
+  } else if (flag("--update")) {
+    execSync("git pull --ff-only", { cwd: cache, stdio: "pipe" });
+  }
+  return cache;
+}
+
+function installVendored(upstream, harnessSkillsDir) {
+  if (!upstream) return;
+  for (const skill of VENDORED) {
+    const src = path.join(upstream, "skills", skill);
+    if (fs.existsSync(src)) copyDir(src, path.join(harnessSkillsDir, skill));
+  }
+  log(`vendored ${VENDORED.length} upstream skills (see apex/skills/VENDORED.md)`);
+}
+
 function installClaudeCode(src) {
   const skillsSrc = path.join(src, "apex", "skills");
   for (const skill of fs.readdirSync(skillsSrc)) {
+    if (skill === "VENDORED.md") continue;
     copyDir(path.join(skillsSrc, skill), path.join(HOME, ".claude", "skills", skill));
   }
+  installVendored(ensureUpstream(), path.join(HOME, ".claude", "skills"));
   copyDir(path.join(src, "apex", "rules"), path.join(HOME, ".claude", "apex", "rules"));
   copyDir(path.join(src, "apex", "steering"), path.join(HOME, ".claude", "apex", "steering"));
   log("claude-code: skills + rules + steering installed");
@@ -83,8 +114,10 @@ function installClaudeCode(src) {
 function installKiro(src) {
   const skillsSrc = path.join(src, "apex", "skills");
   for (const skill of fs.readdirSync(skillsSrc)) {
+    if (skill === "VENDORED.md") continue;
     copyDir(path.join(skillsSrc, skill), path.join(HOME, ".kiro", "skills", skill));
   }
+  installVendored(ensureUpstream(), path.join(HOME, ".kiro", "skills"));
   // Kiro consumes rules + welcome as steering documents
   copyDir(path.join(src, "apex", "rules"), path.join(HOME, ".kiro", "steering"));
   copyDir(path.join(src, "apex", "steering"), path.join(HOME, ".kiro", "steering"));
