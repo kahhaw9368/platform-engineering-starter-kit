@@ -16,6 +16,7 @@ check "$FAKE_HOME/.claude/skills/scaffold-service/SKILL.md"
 check "$FAKE_HOME/.claude/skills/platform-as-product/SKILL.md"
 check "$FAKE_HOME/.claude/apex/rules/apex-rules.md"
 check "$FAKE_HOME/.claude/apex/steering/welcome.md"
+check "$FAKE_HOME/.claude/agents/apex.md"
 # Kiro layout (ADR-0013 verification)
 check "$FAKE_HOME/.kiro/skills/catalog-browse/SKILL.md"
 check "$FAKE_HOME/.kiro/steering/apex-rules.md"

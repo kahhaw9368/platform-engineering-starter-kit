@@ -114,7 +114,8 @@ function installClaudeCode(src) {
   installVendored(ensureUpstream(), path.join(HOME, ".claude", "skills"));
   copyDir(path.join(src, "apex", "rules"), path.join(HOME, ".claude", "apex", "rules"));
   copyDir(path.join(src, "apex", "steering"), path.join(HOME, ".claude", "apex", "steering"));
-  log("claude-code: skills + rules + steering installed");
+  copyDir(path.join(src, "apex", "agents"), path.join(HOME, ".claude", "agents"));
+  log("claude-code: skills + rules + steering + apex agent installed");
 }
 
 function installKiro(src) {
@@ -139,6 +140,7 @@ function uninstall() {
     }
   }
   fs.rmSync(path.join(HOME, ".claude", "apex"), { recursive: true, force: true });
+  fs.rmSync(path.join(HOME, ".claude", "agents", "apex.md"), { force: true });
   log("uninstalled (cache kept; delete ~/.apex-starter-kit to remove fully)");
 }
 
