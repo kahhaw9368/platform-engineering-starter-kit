@@ -115,7 +115,9 @@ function installClaudeCode(src) {
   copyDir(path.join(src, "apex", "rules"), path.join(HOME, ".claude", "apex", "rules"));
   copyDir(path.join(src, "apex", "steering"), path.join(HOME, ".claude", "apex", "steering"));
   copyDir(path.join(src, "apex", "agents"), path.join(HOME, ".claude", "agents"));
-  log("claude-code: skills + rules + steering + apex agent installed");
+  copyDir(path.join(src, "apex", "hooks"), path.join(HOME, ".claude", "apex", "hooks"));
+  installWelcomeHook();
+  log("claude-code: skills + rules + steering + apex agent + welcome hook installed");
 }
 
 function installKiro(src) {
@@ -131,6 +133,27 @@ function installKiro(src) {
   log("kiro: skills + steering installed");
 }
 
+function installWelcomeHook() {
+  // Merge the APEX SessionStart splash into ~/.claude/settings.json (never clobber).
+  const settingsPath = path.join(HOME, ".claude", "settings.json");
+  let settings = {};
+  if (fs.existsSync(settingsPath)) {
+    try { settings = JSON.parse(fs.readFileSync(settingsPath, "utf8")); }
+    catch { log("warn: ~/.claude/settings.json unparseable — skipping welcome hook"); return; }
+  }
+  const hookCmd = path.join(HOME, ".claude", "apex", "hooks", "welcome-hook.sh");
+  settings.hooks = settings.hooks || {};
+  settings.hooks.SessionStart = settings.hooks.SessionStart || [];
+  const already = JSON.stringify(settings.hooks.SessionStart).includes("welcome-hook.sh");
+  if (!already) {
+    settings.hooks.SessionStart.push({
+      matcher: "startup|clear",
+      hooks: [{ type: "command", command: hookCmd, timeout: 10 }],
+    });
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+  }
+}
+
 function uninstall() {
   const skillNames = fs.existsSync(path.join(CACHE, "apex", "skills"))
     ? fs.readdirSync(path.join(CACHE, "apex", "skills")) : [];
@@ -141,6 +164,19 @@ function uninstall() {
   }
   fs.rmSync(path.join(HOME, ".claude", "apex"), { recursive: true, force: true });
   fs.rmSync(path.join(HOME, ".claude", "agents", "apex.md"), { force: true });
+  // Remove the welcome hook entry (leave the rest of settings.json untouched)
+  const sp = path.join(HOME, ".claude", "settings.json");
+  if (fs.existsSync(sp)) {
+    try {
+      const s = JSON.parse(fs.readFileSync(sp, "utf8"));
+      if (s.hooks && s.hooks.SessionStart) {
+        s.hooks.SessionStart = s.hooks.SessionStart.filter(
+          (h) => !JSON.stringify(h).includes("welcome-hook.sh"));
+        if (s.hooks.SessionStart.length === 0) delete s.hooks.SessionStart;
+        fs.writeFileSync(sp, JSON.stringify(s, null, 2) + "\n");
+      }
+    } catch { /* leave unparseable settings alone */ }
+  }
   log("uninstalled (cache kept; delete ~/.apex-starter-kit to remove fully)");
 }
 

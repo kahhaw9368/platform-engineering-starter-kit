@@ -1,0 +1,32 @@
+
+  █████╗  ██████╗  ███████╗ ██╗  ██╗
+ ██╔══██╗ ██╔══██╗ ██╔════╝ ╚██╗██╔╝
+ ███████║ ██████╔╝ █████╗    ╚███╔╝
+ ██╔══██║ ██╔═══╝  ██╔══╝    ██╔██╗
+ ██║  ██║ ██║      ███████╗ ██╔╝ ██╗
+ ╚═╝  ╚═╝ ╚═╝      ╚══════╝ ╚═╝  ╚═╝
+
+ APEX — Agentic Platform Engineering eXperience
+ Your platform engineer, available 24×7
+
+ ⚠   AI & DATA NOTICE
+ All output is AI-generated and must be verified before applying to
+ production systems. APEX never applies changes directly — every change
+ lands as a pull request for human review. Do not paste secrets or PII.
+
+ 📋  QUICK START
+ /catalog                     Browse everything you can self-serve
+ /scaffold-service            Create a service (golden path)
+ /onboard-team                Onboard your team to the platform
+ /promote                     Promote a tested release to prod
+ /service-health              Service health from CloudWatch
+ /verify-setup                Verify your prerequisites
+
+ Or just ask — e.g. "I need a Python API with a Postgres database"
+
+ 🔧  PREREQUISITES
+ git access · AWS IAM Identity Center login · kubectl not required
+
+ 📦  UPDATE    npx github:kahhaw9368/platform-engineering-starter-kit --update
+ 💬  FEEDBACK  Slack #platform-help · rate your journey in one tap, right here
+
