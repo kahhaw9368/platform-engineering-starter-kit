@@ -187,5 +187,6 @@ if (flag("--uninstall")) {
   const harnesses = detectHarnesses();
   if (harnesses.includes("claude-code")) installClaudeCode(src);
   if (harnesses.includes("kiro")) installKiro(src);
-  log(`done. Harnesses: ${harnesses.join(", ")}. Start a session and run /catalog.`);
+  const launch = harnesses.includes("claude-code") ? "claude --agent apex" : "kiro";
+  log(`done. Harnesses: ${harnesses.join(", ")}. Start a session (${launch}) and run /catalog.`);
 }

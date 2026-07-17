@@ -96,11 +96,12 @@ npx github:kahhaw9368/platform-engineering-starter-kit --uninstall        # remo
 ### 4. Start the agent
 
 ```bash
-claude        # or: kiro
+claude --agent apex        # or: kiro
 ```
 
-That's it — the agent CLI loads the APEX skills and rules, and the welcome screen greets
-you with a quick-start menu. From here on, "Apex" is who you're talking to.
+The `--agent apex` matters: it starts the session *as* Apex — persona, rules, and the
+welcome screen with its quick-start menu. A plain `claude` session still has the skills but
+won't greet you as Apex. From here on, "Apex" is who you're talking to.
 
 ### 5. Verify your setup
 
