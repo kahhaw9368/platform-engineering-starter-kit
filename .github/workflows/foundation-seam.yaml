@@ -1,0 +1,18 @@
+# Foundation seam (ticket T16/#18): offline guard for the bootstrap surface.
+# Shellcheck + rendered-config assertions + dry-run behaviour, via CLI stubs —
+# no AWS credentials in CI by design. shellcheck, python3 and PyYAML all ship
+# preinstalled on ubuntu-latest; the test script preflights them with clear errors.
+name: foundation-seam
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  seam:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run seam tests
+        run: ./platform/foundation/tests/test_foundation.sh

@@ -14,6 +14,7 @@
 #                       cluster. Interactive sessions are prompted when unset.
 #   IDC_REGION=...      IAM Identity Center home region, if different from REGION
 #   STARTER_KIT_REPO=.. org/repo of this starter kit (default: derived from git remote)
+#   OUT_DIR=...         directory for rendered cluster configs (default: /tmp)
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -25,6 +26,7 @@ esac
 
 ENVS=(nonprod prod)
 HUB_ENV=nonprod   # managed Argo CD hub (ADR-0004/0007)
+OUT_DIR=${OUT_DIR:-/tmp}
 # ACK day-0 permission scope = the v1 catalog's service surface (ADR-0014): the Team type
 # provisions ECR repos; WebService wires S3/SQS/DynamoDB; dashboards write CloudWatch.
 # Deliberately broad on day 0; tighten with IAM Role Selectors before first prod tenant.
@@ -97,10 +99,10 @@ fi
 # ---------- render cluster configs ----------
 note "render cluster configs"
 for ENV in "${ENVS[@]}"; do
-  sed -e "s/{{env}}/$ENV/g" -e "s/{{region}}/$REGION/g" cluster.eksctl.yaml > "/tmp/cluster-$ENV.yaml"
-  [[ -n "$VPC_BLOCK" ]] && echo "$VPC_BLOCK" >> "/tmp/cluster-$ENV.yaml"
-  grep -q '{{' "/tmp/cluster-$ENV.yaml" && fail "unfilled template markers in /tmp/cluster-$ENV.yaml"
-  echo "   rendered /tmp/cluster-$ENV.yaml"
+  sed -e "s/{{env}}/$ENV/g" -e "s/{{region}}/$REGION/g" cluster.eksctl.yaml > "$OUT_DIR/cluster-$ENV.yaml"
+  [[ -n "$VPC_BLOCK" ]] && echo "$VPC_BLOCK" >> "$OUT_DIR/cluster-$ENV.yaml"
+  grep -q '{{' "$OUT_DIR/cluster-$ENV.yaml" && fail "unfilled template markers in $OUT_DIR/cluster-$ENV.yaml"
+  echo "   rendered $OUT_DIR/cluster-$ENV.yaml"
 done
 
 # ---------- plan ----------
@@ -123,8 +125,8 @@ PLAN
 if $DRY_RUN; then
   note "dry-run: validating rendered configs with eksctl (read-only)"
   for ENV in "${ENVS[@]}"; do
-    eksctl create cluster -f "/tmp/cluster-$ENV.yaml" --dry-run >/dev/null || fail "eksctl rejected /tmp/cluster-$ENV.yaml"
-    echo "   eksctl accepts /tmp/cluster-$ENV.yaml"
+    eksctl create cluster -f "$OUT_DIR/cluster-$ENV.yaml" --dry-run >/dev/null || fail "eksctl rejected $OUT_DIR/cluster-$ENV.yaml"
+    echo "   eksctl accepts $OUT_DIR/cluster-$ENV.yaml"
   done
   note "dry-run complete — nothing was created"
   exit 0
@@ -136,7 +138,7 @@ for ENV in "${ENVS[@]}"; do
     note "cluster: platform-$ENV already exists — skipping"
   else
     note "cluster: platform-$ENV (~20 min)"
-    eksctl create cluster -f "/tmp/cluster-$ENV.yaml"
+    eksctl create cluster -f "$OUT_DIR/cluster-$ENV.yaml"
   fi
 done
 
