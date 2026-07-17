@@ -2,7 +2,7 @@
   "name": "apex-starter-kit",
   "version": "0.1.0",
   "description": "APEX — Agentic Platform Engineering eXperience installer (Claude Code + Kiro CLI)",
-  "bin": { "apex-starter-kit": "./install.js" },
+  "bin": { "apex-starter-kit": "installer/install.js" },
   "repository": "github:kahhaw9368/platform-engineering-starter-kit",
   "license": "MIT-0"
 }
