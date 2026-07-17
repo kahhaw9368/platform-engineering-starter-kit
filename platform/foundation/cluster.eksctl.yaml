@@ -1,7 +1,5 @@
-# PROVISIONAL — validate with AWS container specialist team:
-#   - eksctl Auto Mode syntax for the current eksctl release
-#   - EKS Capabilities (Argo CD / ACK / KRO) enablement API — CLI commands below are the
-#     expected shape; confirm exact commands/console steps at engagement time
+# Live-validated 2026-07-17 (issue #16): eksctl 0.229.0 accepts this Auto Mode config
+# (--dry-run); capability enablement uses the GA `aws eks create-capability` API.
 #
 # Foundation cluster definition (ADR-0004: engagement tooling, one-time, Developers never touch)
 # Instantiated twice: nonprod and prod (ADR-0007). {{env}} filled at bootstrap.

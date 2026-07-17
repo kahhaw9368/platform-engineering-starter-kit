@@ -46,7 +46,7 @@ and operate the platform. Minimum capabilities for the Platform Engineer role:
 | Purpose | Permissions (minimum) |
 |---|---|
 | Create/manage the clusters | `eks:*` on `platform-*` clusters (create, describe, update, delete, access entries) |
-| EKS Capabilities (managed Argo CD, ACK, KRO) | `eks:CreateCapability`, `eks:DescribeCapability`, `eks:DeleteCapability` *(PROVISIONAL — confirm exact actions with the current EKS Capabilities docs)* |
+| EKS Capabilities (managed Argo CD, ACK, KRO) | `eks:CreateCapability`, `eks:DescribeCapability`, `eks:ListCapabilities`, `eks:UpdateCapability`, `eks:DeleteCapability` |
 | Cluster networking (created by eksctl) | `ec2:*` on VPC/subnet/SG resources, `cloudformation:*` on `eksctl-*` stacks |
 | Service roles | `iam:CreateRole`, `iam:AttachRolePolicy`, `iam:PassRole` scoped to `platform-*` roles (incl. the CI OIDC role) |
 | Container registry | `ecr:*` on team repositories |
@@ -72,7 +72,7 @@ and git. That's the point of the one-pipe design (ADR-0004).
 | AWS CLI v2 | `aws --version` | IdC login, CloudWatch reads |
 | GitHub CLI | `gh auth status` | PRs (or your forge's CLI — GitLab: `glab`) |
 | Agent harness | `claude --version` or `kiro --version` | running APEX — [Claude Code](https://claude.com/claude-code) (reference) or Kiro CLI (supported) |
-| eksctl + kubectl | `eksctl version` / `kubectl version --client` | **foundation bootstrap only** — Developers never need these |
+| eksctl ≥ 0.229 + kubectl | `eksctl version` / `kubectl version --client` | **foundation bootstrap only** — Developers never need these (older eksctl rejects k8s 1.33; install from homebrew-core, the weaveworks tap is dead) |
 
 ### 3. Install APEX
 
