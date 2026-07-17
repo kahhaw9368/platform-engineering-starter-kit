@@ -45,6 +45,12 @@ function ensureSource() {
   const local = flag("--source");
   if (local) return path.resolve(local);
   const version = flag("--version");
+  // npx already downloaded this package — use it directly unless the user
+  // asked for a different version or an update (which need the git cache).
+  const packaged = path.resolve(__dirname, "..");
+  if (!version && !flag("--update") && fs.existsSync(path.join(packaged, "apex", "skills"))) {
+    return packaged;
+  }
   if (fs.existsSync(CACHE)) {
     if (flag("--update")) {
       log("updating cache...");
