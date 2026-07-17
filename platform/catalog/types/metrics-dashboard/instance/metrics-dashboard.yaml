@@ -1,0 +1,8 @@
+# MetricsDashboard instance — the Platform Team's own golden-path artifact (ADR-0011).
+apiVersion: platform.starterkit.aws/v1alpha1
+kind: MetricsDashboard
+metadata:
+  name: {{dashboard_name}}
+  namespace: platform-system
+spec:
+  dashboardName: {{dashboard_name}}

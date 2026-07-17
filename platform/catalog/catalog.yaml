@@ -124,3 +124,15 @@ items:
         description: IAM role ARN CI assumes via OIDC to push to ECR (from Foundation bootstrap)
         required: true
         pattern: "arn:aws:iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+" 
+
+  - name: metrics-dashboard
+    kind: kro-type
+    version: 0.1.0
+    description: Platform adoption + fleet health CloudWatch dashboard (the platform measuring itself)
+    path: types/metrics-dashboard/instance
+    parameters:
+      - name: dashboard_name
+        type: string
+        description: CloudWatch dashboard name
+        default: platform-adoption
+        pattern: "[A-Za-z0-9_-]{3,50}"

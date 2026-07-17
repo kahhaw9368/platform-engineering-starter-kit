@@ -161,3 +161,17 @@ def test_rendered_web_api_template_renders_completely(tmp_path):
     assert (out / ".github" / "workflows" / "ci.yaml").exists()
     assert (out / ".apex" / "context.yaml").exists()
     assert "orders-api" in (out / "app" / "main.py").read_text()
+
+
+def test_rendered_metrics_dashboard_passes_guardrails_dogfood(tmp_path):
+    """metrics-dashboard render output passes guardrails (T10/#11)."""
+    render = ROOT / "platform" / "catalog" / "harness" / "render.py"
+    catalog = ROOT / "platform" / "catalog" / "catalog.yaml"
+    out = tmp_path / "rendered"
+    r1 = subprocess.run(
+        [sys.executable, str(render), "--catalog", str(catalog), "--item", "metrics-dashboard",
+         "--out", str(out)],
+        capture_output=True, text=True)
+    assert r1.returncode == 0, r1.stderr
+    r2 = run(out)
+    assert r2.returncode == 0, r2.stdout
