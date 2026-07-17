@@ -6,6 +6,6 @@ Provisions (format TBD, low stakes): VPC, nonprod + prod EKS Auto Mode clusters 
 EKS Capabilities enablement (managed Argo CD hub-and-spoke, ACK, KRO), IAM Identity Center
 wiring, ECR, GitOps repo bootstrap.
 
-- [ ] Decide bootstrap format with container specialist team (eksctl / CFN / Terraform)
-- [ ] Author bootstrap stack
-- [ ] Validate managed-capability enablement steps against current EKS docs
+- [x] Format: eksctl + bootstrap.sh (PROVISIONAL — specialist team may substitute; smallest teachable surface, no state management, consistent with ADR-0004's 'low stakes' framing)
+- [x] cluster.eksctl.yaml + bootstrap.sh authored (capability enablement commands PROVISIONAL)
+- [ ] OPEN: validate capability enablement commands + eksctl Auto Mode syntax with specialist team (blocking for first engagement, not for kit development)
