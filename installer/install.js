@@ -69,7 +69,19 @@ function ensureSource() {
 
 function copyDir(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
-  fs.cpSync(src, dest, { recursive: true });
+  fs.cpSync(src, dest, {
+    recursive: true,
+    filter: (p) => !path.basename(p).match(/^(__pycache__|\.DS_Store)$/),
+  });
+}
+
+function installKitMaterials(src, harnessDir) {
+  // The skills' working materials (ADR-0003): the catalog, its render harness,
+  // and the guardrail policies. Without these an installed-only machine
+  // dead-ends every scaffold — the agent may not freehand what's missing.
+  for (const dir of ["catalog", "guardrails"]) {
+    copyDir(path.join(src, "platform", dir), path.join(harnessDir, "apex", "kit", "platform", dir));
+  }
 }
 
 function detectHarnesses() {
@@ -116,8 +128,9 @@ function installClaudeCode(src) {
   copyDir(path.join(src, "apex", "steering"), path.join(HOME, ".claude", "apex", "steering"));
   copyDir(path.join(src, "apex", "agents"), path.join(HOME, ".claude", "agents"));
   copyDir(path.join(src, "apex", "hooks"), path.join(HOME, ".claude", "apex", "hooks"));
+  installKitMaterials(src, path.join(HOME, ".claude"));
   installWelcomeHook();
-  log("claude-code: skills + rules + steering + apex agent + welcome hook installed");
+  log("claude-code: skills + rules + steering + agents + welcome hook + kit materials installed");
 }
 
 function installKiro(src) {
@@ -130,7 +143,8 @@ function installKiro(src) {
   // Kiro consumes rules + welcome as steering documents
   copyDir(path.join(src, "apex", "rules"), path.join(HOME, ".kiro", "steering"));
   copyDir(path.join(src, "apex", "steering"), path.join(HOME, ".kiro", "steering"));
-  log("kiro: skills + steering installed");
+  installKitMaterials(src, path.join(HOME, ".kiro"));
+  log("kiro: skills + steering + kit materials installed");
 }
 
 function installWelcomeHook() {
@@ -163,6 +177,7 @@ function uninstall() {
     }
   }
   fs.rmSync(path.join(HOME, ".claude", "apex"), { recursive: true, force: true });
+  fs.rmSync(path.join(HOME, ".kiro", "apex"), { recursive: true, force: true });
   fs.rmSync(path.join(HOME, ".claude", "agents", "apex.md"), { force: true });
   fs.rmSync(path.join(HOME, ".claude", "agents", "apex-manager.md"), { force: true });
   // Remove the welcome hook entry (leave the rest of settings.json untouched)

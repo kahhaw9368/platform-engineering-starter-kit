@@ -19,7 +19,13 @@ never guess. Report ALL results (don't stop at first failure), then summarize.
    (`glab auth status`) — read `.apex/context.yaml` for a `forge` key if present.
 4. **AWS credentials via IAM Identity Center** — `aws sts get-caller-identity`.
    Fix hint: `aws sso login` (profile name from `.apex/context.yaml` `aws_profile` key, if set).
-5. **Repo-local APEX context** — does `.apex/context.yaml` exist in the current repo? If yes,
+5. **Catalog reachable** — locate the catalog per the catalog-browse order (repo
+   `catalog_path` → kit checkout → installed copy at `~/.claude/apex/kit/` or
+   `~/.kiro/apex/kit/`) and confirm the file parses. Also
+   `python3 -c "import yaml, jsonschema"` — the render harness needs both.
+   Fix hints: `npx github:kahhaw9368/platform-engineering-starter-kit --update` /
+   `pip3 install pyyaml jsonschema`.
+6. **Repo-local APEX context** — does `.apex/context.yaml` exist in the current repo? If yes,
    confirm service/team/template_version fields parse. If no, note that platform-wide journeys
    still work but service-aware ones ("add X to my service") need a scaffolded repo.
 

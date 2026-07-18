@@ -19,13 +19,16 @@ factory (ADR-0003): everything is rendered from the catalog, never freehanded.
    one ("lowercase and hyphens — it becomes a DNS name"). Confirm the team: read
    `.apex/context.yaml` if present; otherwise ask. If their team isn't onboarded yet, detour to
    the onboard-team journey first (a WebService needs its team namespace).
-3. **Render.** Run the render harness:
-   `python platform/catalog/harness/render.py --catalog <catalog> --item web-api --param k=v ... --out <workdir>`
+3. **Render.** Run the render harness from the same kit root the catalog came from
+   (catalog-browse locates it; on installed-only machines that root is
+   `~/.claude/apex/kit/` or `~/.kiro/apex/kit/`):
+   `python3 <kit_root>/platform/catalog/harness/render.py --catalog <catalog> --item web-api --param k=v ... --out <workdir>`
    Then render the `web-service` item for the GitOps instance. Never hand-edit the output —
-   if something's wrong, fix parameters and re-render.
+   if something's wrong, fix parameters and re-render. (Needs python3 with `pyyaml` and
+   `jsonschema`; if missing, give the pip install line before proceeding.)
 4. **Validate.** Run the guardrail suite on rendered manifests
-   (`python platform/guardrails/policies.py <dir>`). Golden-path output passes by construction;
-   if it doesn't, that's a platform bug — report it, don't patch around it.
+   (`python3 <kit_root>/platform/guardrails/policies.py <dir>`). Golden-path output passes by
+   construction; if it doesn't, that's a platform bug — report it, don't patch around it.
 5. **Open the PRs.**
    - Service repo: create via the forge CLI (`gh repo create <org>/<service_name>` per the
      customer's org convention in `.apex/context.yaml`), push rendered content on a branch,

@@ -12,5 +12,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: "20"}
+      - run: pip install pyyaml jsonschema   # render-from-installed-copy check (#25)
       - run: bash installer/tests/test_installer.sh
       - run: bash installer/tests/test_welcome_hook.sh

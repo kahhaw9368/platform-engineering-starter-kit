@@ -11,9 +11,14 @@ to them (mention this only if asked).
 
 ## Process
 
-1. Locate the catalog: `platform/catalog/catalog.yaml` in the starter-kit repo, or the path
-   configured in this repo's `.apex/context.yaml` (`catalog_path` key), or ask the Platform Team
-   member where their catalog lives if neither is present.
+1. Locate the catalog — first match wins:
+   1. the path configured in this repo's `.apex/context.yaml` (`catalog_path` key) — a
+      customer-published catalog always beats the kit default,
+   2. `platform/catalog/catalog.yaml` in a starter-kit checkout (current repo),
+   3. the installed kit copy: `~/.claude/apex/kit/platform/catalog/catalog.yaml` (Kiro:
+      `~/.kiro/apex/kit/...`) — present on every machine the installer has run on.
+   If none exists, the install is broken — point at
+   `npx github:kahhaw9368/platform-engineering-starter-kit --update` and the Platform Team.
 2. Read it (plain YAML). Filter out items whose name starts with `dummy-` (seam fixtures).
 3. Present a table: **name · kind · version · description**. Flag 0.x versions as
    "early adopter" per the semver trust convention (criteria #7).

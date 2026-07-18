@@ -74,6 +74,7 @@ Developers need none of these write permissions — their path is covered in
 | git | `git --version` | everything — all change flows through git |
 | AWS CLI v2 | `aws --version` | Identity Center login, CloudWatch reads |
 | GitHub CLI | `gh auth status` | pull requests (or your forge's CLI — GitLab: `glab`) |
+| Python 3 + `pyyaml`, `jsonschema` | `python3 -c "import yaml, jsonschema"` | rendering catalog templates (`pip3 install pyyaml jsonschema`) |
 | An agent CLI — [Claude Code](https://claude.com/claude-code) or [Kiro CLI](https://kiro.dev); you need one, not both | `claude --version` or `kiro --version` | running APEX (APEX is content these CLIs load, not a separate program) |
 | eksctl ≥ 0.229 + kubectl | `eksctl version` / `kubectl version --client` | **step 7 only** — Developers never need these. Install per the [eksctl docs](https://eksctl.io/installation/); versions below 0.229 reject the Kubernetes version the kit uses |
 
@@ -84,8 +85,9 @@ npx github:kahhaw9368/platform-engineering-starter-kit
 ```
 
 The installer detects which agent CLI you have and copies everything into place: the APEX
-skills, curated EKS knowledge, and the agent's rules and welcome screen — into `~/.claude/`
-and/or `~/.kiro/`.
+skills, curated EKS knowledge, the agent's rules and welcome screen, and the service
+catalog with its render tooling — into `~/.claude/` and/or `~/.kiro/`. Nothing else to
+clone; the agent works from any directory.
 
 ```bash
 npx github:kahhaw9368/platform-engineering-starter-kit --update           # refresh
@@ -160,9 +162,10 @@ One-time setup:
 
 1. **Get access** — Identity Center login (`aws sso login`), CloudWatch read, and git.
    Nothing from the platform-engineer permission table.
-2. **Install the tools** — Node.js 18+, git, AWS CLI v2, GitHub CLI, and one agent CLI:
-   [Claude Code](https://claude.com/claude-code) or [Kiro CLI](https://kiro.dev). No eksctl,
-   no kubectl — those are platform-engineer tools.
+2. **Install the tools** — Node.js 18+, git, AWS CLI v2, GitHub CLI, Python 3 with
+   `pyyaml` + `jsonschema` (`pip3 install pyyaml jsonschema` — used to render service
+   templates), and one agent CLI: [Claude Code](https://claude.com/claude-code) or
+   [Kiro CLI](https://kiro.dev). No eksctl, no kubectl — those are platform-engineer tools.
 3. **Install APEX**:
 
    ```bash
