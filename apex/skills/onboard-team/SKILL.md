@@ -1,6 +1,6 @@
 ---
 name: onboard-team
-description: Onboard a Dev Team to the platform — render a Team instance and open the GitOps PR. Use when someone wants to onboard/add their team, get a namespace, or join the platform.
+description: Onboard a Dev Team to the platform — render a Team instance and open the GitOps PR. A Platform Team journey (apex-manager). Use when a platform engineer wants to onboard/add a team, grant a namespace, or bring a team onto the platform.
 ---
 
 # Onboard Team
@@ -8,6 +8,10 @@ description: Onboard a Dev Team to the platform — render a Team instance and o
 Render a `team` catalog item and open one GitOps PR. On merge: namespace, quotas, RBAC bound to
 their IdC group, and an ECR repo exist (ADR-0008). This is the platform's front door for teams —
 and the adoption metric's unit (ADR-0011).
+
+**Platform Team journey.** If you are the developer-facing apex agent, don't run this:
+onboarding decisions (quotas, tenancy) belong to the Platform Team. Give the user a
+ready-to-paste request for the platform channel (team name + IdC group) instead.
 
 ## Process
 

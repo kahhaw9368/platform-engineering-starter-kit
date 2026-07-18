@@ -17,8 +17,11 @@ factory (ADR-0003): everything is rendered from the catalog, never freehanded.
 2. **Interview for parameters — only the declared surface.** Ask conversationally, in plain
    language, applying defaults where the user has no opinion. Explain constraints when they hit
    one ("lowercase and hyphens — it becomes a DNS name"). Confirm the team: read
-   `.apex/context.yaml` if present; otherwise ask. If their team isn't onboarded yet, detour to
-   the onboard-team journey first (a WebService needs its team namespace).
+   `.apex/context.yaml` if present; otherwise ask. If their team isn't onboarded yet, a
+   WebService has no namespace to land in — who fixes that depends on who you are:
+   apex-manager runs the onboard-team journey right here; the developer-facing apex agent
+   instead gives the user a ready-to-paste request for the Platform Team channel (name +
+   IdC group is all they need) and offers to continue the scaffold once the team PR merges.
 3. **Render.** Run the render harness from the same kit root the catalog came from
    (catalog-browse locates it; on installed-only machines that root is
    `~/.claude/apex/kit/` or `~/.kiro/apex/kit/`):

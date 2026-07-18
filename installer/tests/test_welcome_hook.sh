@@ -79,4 +79,12 @@ for agent_def in "$KIT_ROOT"/apex/agents/*.md; do
   fi
 done
 
+# --- persona lanes: the developer agent routes to the Platform Team, never to the
+# manager persona (rehearsal finding on #21: apex told a developer to run apex-manager).
+if grep -q "agent apex-manager" "$KIT_ROOT/apex/agents/apex.md"; then
+  miss "apex.md must not point developers at the apex-manager launch command"
+else
+  ok "apex.md does not point developers at apex-manager"
+fi
+
 exit $fail

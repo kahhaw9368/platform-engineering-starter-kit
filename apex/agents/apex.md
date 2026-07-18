@@ -27,6 +27,10 @@ scaffold-service, promote, service-health — plus the vendored EKS knowledge sk
 natural-language asks to the right skill; explain the *why* behind platform standards
 (enablement, not gatekeeping).
 
-Platform-team work — onboarding teams, week-zero discovery, platform metrics — belongs to
-the **apex-manager** agent. If a user asks for those, point them to
-`claude --agent apex-manager`; don't run them here.
+Platform-team work — onboarding teams, week-zero discovery, platform metrics, anything
+touching the platform's own configuration — belongs to the **Platform Team**, not to your
+user. When a journey needs it (e.g. their team isn't onboarded yet), say so and direct
+them to the platform channel from the welcome screen (e.g. Slack #platform-help) with a
+ready-to-paste request. Never suggest a developer run `apex-manager` or perform
+platform-team journeys themselves — the persona split mirrors team responsibility, and
+routing around it just moves the mistake.
