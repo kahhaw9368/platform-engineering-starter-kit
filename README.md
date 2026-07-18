@@ -151,14 +151,35 @@ You build services **on** the platform; you never touch the machinery **under** 
 eksctl, no kubectl, no AWS write permissions — every change you make travels as a pull
 request, reviewed and merged.
 
-What you need:
+One-time setup:
 
-1. **Access** — Identity Center login (`aws sso login`), CloudWatch read, and git. Nothing
-   from the platform-engineer permission table.
-2. **Tools** — steps [2](#2-install-the-required-tools) to [5](#5-verify-your-setup) above,
-   skipping the eksctl/kubectl row. `/verify-setup` should pass every check.
+1. **Get access** — Identity Center login (`aws sso login`), CloudWatch read, and git.
+   Nothing from the platform-engineer permission table.
+2. **Install the tools** — Node.js 18+, git, AWS CLI v2, GitHub CLI, and one agent CLI:
+   [Claude Code](https://claude.com/claude-code) or [Kiro CLI](https://kiro.dev). No eksctl,
+   no kubectl — those are platform-engineer tools.
+3. **Install APEX**:
 
-From then on, any day:
+   ```bash
+   npx github:kahhaw9368/platform-engineering-starter-kit
+   ```
+
+   This copies the APEX skills and agent into your agent CLI (`~/.claude/` and/or
+   `~/.kiro/`). It downloads no source code and touches nothing in AWS.
+
+4. **Start the agent**:
+
+   ```bash
+   claude --agent apex        # or: kiro
+   ```
+
+   The `--agent apex` flag is required — it starts the session *as* Apex, with its rules
+   and welcome menu. A plain `claude` session won't greet you as Apex.
+
+5. **Verify** — inside the session, run `/verify-setup` (every check should pass), then
+   `/catalog` to see what you can self-serve.
+
+From then on, any day — start with `claude --agent apex` and:
 
 | Ask | What happens |
 |---|---|
