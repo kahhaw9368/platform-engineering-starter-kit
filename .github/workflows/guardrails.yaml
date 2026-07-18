@@ -1,6 +1,11 @@
 # Guardrail policy suite (ticket T2 / issue #3, ADR-0009) — reusable workflow.
 # GitOps repos call this as their required PR check; this repo dog-foods it
 # on its own catalog output.
+#
+# Two modes, split by manifest_dir. workflow_call runs check out the CALLER's
+# repo, which has no guardrails code — so cross-repo mode checks out the
+# caller and this kit side by side and runs the kit's suite on the caller's
+# manifests (#26).
 name: guardrails
 on:
   pull_request:
@@ -9,18 +14,20 @@ on:
   workflow_call:
     inputs:
       manifest_dir:
-        description: Directory of manifests to check
+        description: Directory of manifests to check, relative to the caller repo root
         type: string
         required: true
 jobs:
   policy-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install pyyaml jsonschema pytest
+      # --- self mode: this repo's own PRs/pushes exercise the suite on itself ---
+      - uses: actions/checkout@v4
+        if: inputs.manifest_dir == ''
       - name: Guardrail suite self-tests
         if: inputs.manifest_dir == ''
         run: pytest platform/guardrails/tests/ -q
@@ -31,6 +38,16 @@ jobs:
             --catalog platform/catalog/catalog.yaml --item dummy-item \
             --param widget_name=dogfood --param team=ci --out /tmp/rendered
           python platform/guardrails/policies.py /tmp/rendered
+      # --- cross-repo mode: a GitOps repo's PR check (workflow_call) ---
+      - uses: actions/checkout@v4          # the caller's manifests
+        if: inputs.manifest_dir != ''
+        with:
+          path: caller
+      - uses: actions/checkout@v4          # the kit's guardrail suite
+        if: inputs.manifest_dir != ''
+        with:
+          repository: kahhaw9368/platform-engineering-starter-kit
+          path: kit
       - name: Check provided manifests
         if: inputs.manifest_dir != ''
-        run: python platform/guardrails/policies.py "${{ inputs.manifest_dir }}"
+        run: python kit/platform/guardrails/policies.py "caller/${{ inputs.manifest_dir }}"
