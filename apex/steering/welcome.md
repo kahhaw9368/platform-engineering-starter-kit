@@ -1,8 +1,11 @@
 # APEX Welcome Screen (session start)
 
-Rendered at session start via the harness (Claude Code: SessionStart hook prints it; Kiro:
-steering include). Content per docs/design/apex-welcome-screen.md; the Platform Team customizes
-the marked lines at bootstrap. Every command listed MUST exist (criteria #6 rule).
+Rendered at session start via the harness. Claude Code: the SessionStart hook prints a
+per-agent splash (apex/hooks/welcome.txt for the `apex` developer agent,
+welcome-manager.txt for `apex-manager`); Kiro has no agent split, so this combined version
+ships as a steering include. Content per docs/design/apex-welcome-screen.md; the Platform
+Team customizes the marked lines at bootstrap. Every command listed MUST exist
+(criteria #6 rule).
 
 ```text
                                                 Share feedback anytime with /feedback.

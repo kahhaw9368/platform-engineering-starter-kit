@@ -17,7 +17,10 @@ check "$FAKE_HOME/.claude/skills/platform-as-product/SKILL.md"
 check "$FAKE_HOME/.claude/apex/rules/apex-rules.md"
 check "$FAKE_HOME/.claude/apex/steering/welcome.md"
 check "$FAKE_HOME/.claude/agents/apex.md"
+check "$FAKE_HOME/.claude/agents/apex-manager.md"
 check "$FAKE_HOME/.claude/apex/hooks/welcome-hook.sh"
+check "$FAKE_HOME/.claude/apex/hooks/welcome.txt"
+check "$FAKE_HOME/.claude/apex/hooks/welcome-manager.txt"
 grep -q "welcome-hook.sh" "$FAKE_HOME/.claude/settings.json" && echo "ok   welcome hook merged into settings.json" || { echo "MISS welcome hook in settings"; fail=1; }
 node "$KIT_ROOT/installer/install.js" --source "$KIT_ROOT" --home "$FAKE_HOME" > /dev/null
 [ "$(grep -c welcome-hook.sh "$FAKE_HOME/.claude/settings.json")" = "1" ] && echo "ok   hook install idempotent" || { echo "MISS idempotency"; fail=1; }

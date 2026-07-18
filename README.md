@@ -95,13 +95,18 @@ npx github:kahhaw9368/platform-engineering-starter-kit --uninstall        # remo
 
 ### 4. Start the agent
 
+APEX comes as two personas: **`apex-manager`** for you (platform-team journeys: discovery
+workshop, onboarding teams, platform metrics) and **`apex`** for your developers (scaffold,
+promote, service health). As the platform engineer, start yours:
+
 ```bash
-claude --agent apex        # or: kiro
+claude --agent apex-manager        # or: kiro
 ```
 
-The `--agent apex` matters: it starts the session *as* Apex — persona, rules, and the
-welcome screen with its quick-start menu. A plain `claude` session still has the skills but
-won't greet you as Apex. From here on, "Apex" is who you're talking to.
+The `--agent` flag matters: it starts the session *as* that persona — rules, welcome screen,
+quick-start menu. A plain `claude` session still has the skills but won't greet you as
+Apex. From here on, "Apex" is who you're talking to. (The persona split is guidance, not a
+permission boundary — access control stays in IAM and PR review.)
 
 ### 5. Verify your setup
 

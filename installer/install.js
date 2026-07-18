@@ -164,6 +164,7 @@ function uninstall() {
   }
   fs.rmSync(path.join(HOME, ".claude", "apex"), { recursive: true, force: true });
   fs.rmSync(path.join(HOME, ".claude", "agents", "apex.md"), { force: true });
+  fs.rmSync(path.join(HOME, ".claude", "agents", "apex-manager.md"), { force: true });
   // Remove the welcome hook entry (leave the rest of settings.json untouched)
   const sp = path.join(HOME, ".claude", "settings.json");
   if (fs.existsSync(sp)) {
@@ -187,6 +188,11 @@ if (flag("--uninstall")) {
   const harnesses = detectHarnesses();
   if (harnesses.includes("claude-code")) installClaudeCode(src);
   if (harnesses.includes("kiro")) installKiro(src);
-  const launch = harnesses.includes("claude-code") ? "claude --agent apex" : "kiro";
-  log(`done. Harnesses: ${harnesses.join(", ")}. Start a session (${launch}) and run /catalog.`);
+  if (harnesses.includes("claude-code")) {
+    log("done. Start a session and run /catalog:");
+    log("  developers:         claude --agent apex");
+    log("  platform engineers: claude --agent apex-manager");
+  } else {
+    log("done. Start a session (kiro) and run /catalog.");
+  }
 }
