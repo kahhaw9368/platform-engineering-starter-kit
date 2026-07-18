@@ -1,4 +1,4 @@
-# Live-validated 2026-07-17 (issue #16): eksctl 0.229.0 accepts this Auto Mode config
+# Live-validated 2026-07-18 (issue #21): eksctl 0.229.0 accepts this Auto Mode config
 # (--dry-run); capability enablement uses the GA `aws eks create-capability` API.
 #
 # Foundation cluster definition (ADR-0004: engagement tooling, one-time, Developers never touch)
@@ -8,7 +8,9 @@ kind: ClusterConfig
 metadata:
   name: platform-{{env}}
   region: {{region}}
-  version: "1.33"
+  # Keep pinned to the EKS default version (aws eks describe-cluster-versions) —
+  # older pins slide into extended support and its control-plane price surcharge.
+  version: "1.36"
   tags:
     starterkit.aws/layer: foundation
     starterkit.aws/env: {{env}}

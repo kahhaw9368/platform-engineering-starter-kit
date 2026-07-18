@@ -21,8 +21,8 @@ NAT gateways. Teardown (below) reverses all of it.
 
 ## Prerequisites
 
-- aws CLI v2, **eksctl ≥ 0.229** (older releases reject k8s 1.33; the weaveworks tap is dead —
-  install from homebrew-core), kubectl, gh (authenticated), git
+- aws CLI v2, **eksctl ≥ 0.229** (older releases reject the Kubernetes version the kit pins;
+  the weaveworks tap is dead — install from homebrew-core), kubectl, gh (authenticated), git
 - AWS credentials (`aws sso login`) with the Platform Engineer permission set
   (IAM table in the root README)
 - An IAM Identity Center instance (note its ARN, and its home region if different)
