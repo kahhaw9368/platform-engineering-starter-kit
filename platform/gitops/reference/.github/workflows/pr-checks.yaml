@@ -4,7 +4,11 @@ name: guardrails
 on:
   pull_request:
 jobs:
-  policy-check:
+  # Job name is load-bearing: reusable-workflow checks report as
+  # "<caller job> / <called job>", and branch protection (bootstrap.sh)
+  # requires the context "guardrails / policy-check". Renaming this job
+  # orphans the required check and blocks every PR.
+  guardrails:
     uses: {{starter_kit_repo}}/.github/workflows/guardrails.yaml@main
     with:
       manifest_dir: .
