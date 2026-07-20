@@ -20,7 +20,7 @@ spec:
       image: string | required=true description="Full image ref with pinned tag (ECR)"
       port: integer | default=8080 description="Container HTTP port"
       replicas: integer | default=2 description="Desired replicas"
-      size: string | default="small" description="T-shirt size: small|medium|large"
+      size: 'string | default="small" description="T-shirt size (small|medium|large)"'
   resources:
     - id: deployment
       template:
@@ -56,9 +56,13 @@ spec:
                   securityContext:
                     allowPrivilegeEscalation: false
                   livenessProbe:
-                    httpGet: {path: /healthz, port: ${schema.spec.port}}
+                    httpGet:
+                      path: /healthz
+                      port: ${schema.spec.port}
                   readinessProbe:
-                    httpGet: {path: /ready, port: ${schema.spec.port}}
+                    httpGet:
+                      path: /ready
+                      port: ${schema.spec.port}
     - id: service
       template:
         apiVersion: v1
