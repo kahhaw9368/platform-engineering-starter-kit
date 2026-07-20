@@ -1,0 +1,16 @@
+# Team instance (example) — the artifact APEX PRs to onboard a Dev Team (ADR-0008).
+# Every team folder MUST contain a team.yaml: it creates the team-<name> namespace that
+# the folder's WebService instances land in. A service manifest without its Team blocks
+# the whole teams sync wave (the namespace never exists). Expands via the team RGD.
+apiVersion: kro.run/v1alpha1
+kind: Team
+metadata:
+  name: example-team
+  # Team instances live in the platform's own namespace; the RGD creates team-example-team.
+  namespace: platform-system
+spec:
+  teamName: example-team
+  idcGroup: example-team
+  cpuQuota: "8"
+  memoryQuota: 16Gi
+  podQuota: 50
