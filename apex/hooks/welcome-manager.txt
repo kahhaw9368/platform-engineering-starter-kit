@@ -23,6 +23,7 @@
 
  Developer journeys (/scaffold-service, /promote, /service-health) also work
  here — useful for walking a golden path end-to-end.
+ Lost this menu? /apex brings it back any time.
 
  🔧  PREREQUISITES
  git access · AWS IAM Identity Center login · Platform Engineer permission set

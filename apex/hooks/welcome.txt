@@ -22,6 +22,7 @@
  /verify-setup                Verify your prerequisites
 
  Or just ask — e.g. "I need a Python API with a Postgres database"
+ Lost this menu? /apex brings it back any time.
 
  🔧  PREREQUISITES
  git access · AWS IAM Identity Center login · kubectl not required
