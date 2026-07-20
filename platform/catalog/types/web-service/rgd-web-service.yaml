@@ -14,9 +14,9 @@ spec:
   schema:
     apiVersion: v1alpha1
     kind: WebService
-    # Instances use apiVersion platform.starterkit.aws/v1alpha1; without this KRO would
-    # default the served group to kro.run and the instance manifests wouldn't resolve.
-    group: platform.starterkit.aws
+    # Managed KRO (EKS capability) only serves the kro.run API group — its controller has
+    # no watch permission for custom groups, so instances must be kro.run/v1alpha1.
+    group: kro.run
     spec:
       serviceName: string | required=true description="Service identifier (kebab-case)"
       teamName: string | required=true description="Owning Dev Team (namespace team-<teamName>)"

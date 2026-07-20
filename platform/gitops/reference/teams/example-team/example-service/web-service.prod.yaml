@@ -1,5 +1,5 @@
 # prod state — ONLY promotion PRs touch this file (human-gated via CODEOWNERS)
-apiVersion: platform.starterkit.aws/v1alpha1
+apiVersion: kro.run/v1alpha1
 kind: WebService
 metadata:
   name: example-service
