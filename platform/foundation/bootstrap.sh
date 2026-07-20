@@ -212,16 +212,22 @@ aws iam get-open-id-connect-provider --open-id-connect-provider-arn "$OIDC_ARN" 
     --client-id-list sts.amazonaws.com >/dev/null
 # Scaffolded SERVICE repos assume this role from their CI (web-api template), so trust the
 # whole org, not just the GitOps repo. Tighten to an explicit repo list at engagement.
+# Two sub patterns: GitHub OIDC tokens may carry the plain owner/repo form or the
+# immutable-ID form (owner@id/repo@id) — trust must match both or CI gets AccessDenied.
 CI_TRUST=$(cat <<JSON
 {"Version":"2012-10-17","Statement":[{"Effect":"Allow",
  "Principal":{"Federated":"$OIDC_ARN"},
  "Action":"sts:AssumeRoleWithWebIdentity",
  "Condition":{"StringEquals":{"token.actions.githubusercontent.com:aud":"sts.amazonaws.com"},
-              "StringLike":{"token.actions.githubusercontent.com:sub":"repo:${GITOPS_REPO%%/*}/*"}}}]}
+              "StringLike":{"token.actions.githubusercontent.com:sub":
+                ["repo:${GITOPS_REPO%%/*}/*","repo:${GITOPS_REPO%%/*}@*/*"]}}}]}
 JSON
 )
 aws iam get-role --role-name platform-ci >/dev/null 2>&1 || \
   aws iam create-role --role-name platform-ci --assume-role-policy-document "$CI_TRUST" >/dev/null
+# Existing roles created by an earlier bootstrap keep their old (single-pattern) trust;
+# refresh it so re-runs heal the AccessDenied case too.
+aws iam update-assume-role-policy --role-name platform-ci --policy-document "$CI_TRUST"
 aws iam put-role-policy --role-name platform-ci --policy-name ecr-push --policy-document "$(cat <<JSON
 {"Version":"2012-10-17","Statement":[
  {"Effect":"Allow","Action":"ecr:GetAuthorizationToken","Resource":"*"},
