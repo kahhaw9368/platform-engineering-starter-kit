@@ -7,7 +7,7 @@ metadata:
 spec:
   serviceName: example-service
   teamName: example-team
-  image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/example-team/example-service:abc123def456
+  image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/example-team:example-service-abc123def456
   port: 8080
   replicas: 3
   size: small

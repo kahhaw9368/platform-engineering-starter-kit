@@ -11,7 +11,9 @@ env:
   # PROVISIONAL — engagement wiring: account, region, and role are set when the
   # Foundation is bootstrapped (T6). OIDC role assumption, no long-lived keys.
   AWS_REGION: us-east-1
-  ECR_REPO: {{team}}/{{service_name}}
+  # One ECR repo per team (created by the Team RGD at onboarding); services share it
+  # and are disambiguated by the image tag prefix below. See ADR-0008 / catalog team type.
+  ECR_REPO: {{team}}
   GITOPS_REPO: {{gitops_repo}}
 jobs:
   test:
@@ -38,7 +40,8 @@ jobs:
         id: ecr
       - name: Build and push (contract steps 1+2)
         run: |
-          IMAGE="${{ steps.ecr.outputs.registry }}/${ECR_REPO}:${GITHUB_SHA::12}"
+          # Tag prefixed with the service name so multiple services can share the team repo.
+          IMAGE="${{ steps.ecr.outputs.registry }}/${ECR_REPO}:{{service_name}}-${GITHUB_SHA::12}"
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"

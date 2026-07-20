@@ -86,7 +86,8 @@ spec:
           apiGroup: rbac.authorization.k8s.io
     - id: ecrRepo
       template:
-        # ACK ECR controller (managed capability) — one repo per team namespace prefix
+        # ACK ECR controller (managed capability) — one repo per team, named after the team.
+        # Services share it; the web-api CI tags images <service>-<sha> to avoid collisions.
         apiVersion: ecr.services.k8s.aws/v1alpha1
         kind: Repository
         metadata:
