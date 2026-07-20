@@ -166,16 +166,18 @@ One-time setup:
    `pyyaml` + `jsonschema` (`pip3 install pyyaml jsonschema` — used to render service
    templates), and one agent CLI: [Claude Code](https://claude.com/claude-code) or
    [Kiro CLI](https://kiro.dev). No eksctl, no kubectl — those are platform-engineer tools.
-3. **Install APEX**:
+3. **Install APEX** — run this from anywhere; no folder to create, no repo to clone:
 
    ```bash
    npx github:kahhaw9368/platform-engineering-starter-kit
    ```
 
-   This copies the APEX skills and agent into your agent CLI (`~/.claude/` and/or
-   `~/.kiro/`). It downloads no source code and touches nothing in AWS.
+   It installs into your agent CLI's home (`~/.claude/` and/or `~/.kiro/`) and leaves
+   your current directory untouched — nothing appears where you ran it, and there is
+   nothing to `cd` into afterward. It touches nothing in AWS. It's a one-time install,
+   not something you re-run per project.
 
-4. **Start the agent**:
+4. **Start the agent** — again, from anywhere:
 
    ```bash
    claude --agent apex        # or: kiro
@@ -187,7 +189,13 @@ One-time setup:
 5. **Verify** — inside the session, run `/verify-setup` (every check should pass), then
    `/catalog` to see what you can self-serve.
 
-From then on, any day — start with `claude --agent apex` and:
+**Where do my files go?** You never work inside the platform's repos. Your first
+`/scaffold-service` *creates* your service repo (via a pull request); once it merges, clone
+that repo and run future sessions inside it — that's how Apex knows which service you mean
+for "promote", "how is my service doing", and "add X to my service".
+
+From then on, any day — start with `claude --agent apex` (inside your service repo once you
+have one) and:
 
 | Ask | What happens |
 |---|---|
