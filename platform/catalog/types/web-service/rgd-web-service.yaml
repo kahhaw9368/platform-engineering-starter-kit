@@ -98,7 +98,7 @@ spec:
         spec:
           name: team-${schema.spec.teamName}-${schema.spec.serviceName}-5xx
           metricName: HTTPCode_Target_5XX_Count
-          namespace_: AWS/ApplicationELB
+          namespace: AWS/ApplicationELB
           statistic: Sum
           period: 300
           evaluationPeriods: 1
