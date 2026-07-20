@@ -21,7 +21,7 @@ spec:
       memoryQuota: string | default="16Gi" description="Namespace memory request quota"
       podQuota: integer | default=50 description="Max pods in the team namespace"
   resources:
-    - id: namespace
+    - id: teamNamespace   # 'namespace' is a reserved id in KRO — must not be used
       template:
         apiVersion: v1
         kind: Namespace
