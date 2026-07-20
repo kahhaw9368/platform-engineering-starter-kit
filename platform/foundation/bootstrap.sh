@@ -166,8 +166,8 @@ ensure_capability() { # cluster name type role-arn [extra args...]
       --role-arn "$ROLE" --delete-propagation-policy RETAIN "$@"
   fi
 }
-ARGOCD_ROLE=$(capability_role platform-capability-argocd)          # no perms needed by default
-KRO_ROLE=$(capability_role platform-capability-kro)                # kro needs none
+ARGOCD_ROLE=$(capability_role platform-capability-argocd)          # IAM perms via inline policy below (CodeConnections)
+KRO_ROLE=$(capability_role platform-capability-kro)                # no IAM perms; needs cluster RBAC (below)
 ACK_ROLE=$(capability_role platform-capability-ack "${ACK_POLICIES[@]}")
 
 ensure_capability "platform-$HUB_ENV" argocd ARGOCD "$ARGOCD_ROLE" \
@@ -175,6 +175,25 @@ ensure_capability "platform-$HUB_ENV" argocd ARGOCD "$ARGOCD_ROLE" \
 for ENV in "${ENVS[@]}"; do
   ensure_capability "platform-$ENV" ack ACK "$ACK_ROLE"
   ensure_capability "platform-$ENV" kro KRO "$KRO_ROLE"
+done
+
+# Capability cluster RBAC. AmazonEKSKROPolicy lets KRO manage RGDs/instances only — it grants
+# NO permission to create the resources *inside* an RGD (namespaces, quotas, RBAC, ACK objects,
+# workloads). Without this the Team/WebService types stay Ready=False and nothing deploys.
+# Cluster-admin is the AWS-documented quick-start; tighten to least-privilege before prod.
+# Argo CD (hub) likewise needs RBAC on each cluster it deploys to (itself + remote spokes).
+for ENV in "${ENVS[@]}"; do
+  aws eks associate-access-policy --region "$REGION" --cluster-name "platform-$ENV" \
+    --principal-arn "$KRO_ROLE" \
+    --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy \
+    --access-scope type=cluster >/dev/null
+  # The hub's Argo CD role deploys to every cluster (hub-and-spoke: only HUB_ENV runs Argo CD).
+  aws eks create-access-entry --region "$REGION" --cluster-name "platform-$ENV" \
+    --principal-arn "$ARGOCD_ROLE" --type STANDARD >/dev/null 2>&1 || true
+  aws eks associate-access-policy --region "$REGION" --cluster-name "platform-$ENV" \
+    --principal-arn "$ARGOCD_ROLE" \
+    --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy \
+    --access-scope type=cluster >/dev/null
 done
 
 # ---------- 4. GitOps repo ----------
@@ -240,13 +259,24 @@ echo "   ci_role_arn: arn:aws:iam::$ACCOUNT_ID:role/platform-ci (feeds the web-a
 
 note "done — NEXT STEPS (manual, in order)"
 cat <<'NEXT'
-   1. Authorize the Argo CD hub's Git connection to the GitOps repo (console approval)
-      and register the prod cluster with the hub.
+   1. Connect the Argo CD hub to the GitOps repo (ONE manual step — CodeConnections needs a
+      browser OAuth handshake AWS can't automate):
+        a. aws codeconnections create-connection --provider-type GitHub --connection-name platform-gitops
+        b. Console -> Developer Tools -> Settings -> Connections -> platform-gitops ->
+           "Update pending connection" -> authorize; wait for status AVAILABLE.
+        c. Grant the Argo CD capability role codeconnections:UseConnection/GetConnection on that ARN.
+        d. Register both clusters as Argo targets (secrets labelled argocd.argoproj.io/secret-type=cluster,
+           server = the EKS cluster ARN) and apply the root app-of-apps Applications
+           (clusters/<env>/ per platform/gitops/reference). repoURL is the CodeConnections proxy:
+           https://codeconnections.<region>.amazonaws.com/git-http/<acct>/<region>/<conn-id>/<owner>/<repo>.git
+      The RGDs + team/web-service instances then sync automatically (KRO/Argo RBAC granted above).
    2. Map IdC groups to cluster RBAC via EKS access entries (Dev Teams + Platform Team),
       and to Argo CD roles (update-capability --configuration rbacRoleMappings).
-   3. Publish the catalog RGDs into the GitOps repo's platform/ folder and wire the Argo CD
-      ApplicationSets so both clusters sync them (smoke.md checks `kubectl api-resources`).
-   4. Tighten the ACK role from day-0 policies to IAM Role Selectors, and the platform-ci
-      trust from org-wide to explicit service repos, before first prod tenant.
-   5. Run the smoke checklist: platform/foundation/smoke.md — every box before week one.
+   3. Tighten the ACK role from day-0 policies to IAM Role Selectors, the platform-ci trust
+      from org-wide to explicit service repos, and the KRO/Argo cluster-admin grants above to
+      least-privilege RBAC — all before the first prod tenant.
+   4. Run the smoke checklist: platform/foundation/smoke.md — every box before week one.
+
+   NOTE — golden-path RGDs must use apiVersion kro.run/v1alpha1: managed KRO only serves the
+   kro.run API group (its controller can't watch a custom group). This is baked into the catalog.
 NEXT
