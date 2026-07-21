@@ -1,0 +1,51 @@
+# Apex documentation site (MkDocs Material). Provisioning tracked in issue #33.
+# Build locally:  pip install mkdocs-material && mkdocs serve  (from this docs-site/ folder)
+site_name: Apex — Platform Documentation
+site_description: How the Apex internal developer platform works — features, workflows, and architecture.
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      # Renders ```mermaid code blocks as diagrams (diagrams-as-code, issue #33).
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - For Platform Engineers:
+      - Onboard a team: platform-engineers/onboard-team.md
+
+plugins:
+  - search

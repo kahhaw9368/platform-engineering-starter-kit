@@ -1,3 +1,6 @@
 .venv/
 __pycache__/
 *.pyc
+
+# MkDocs build output
+docs-site/site/
